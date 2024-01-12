@@ -1,16 +1,31 @@
-# terraform-aws-module-template
+# [terraform-aws-arc-document-db](https://github.com/sourcefuse/terraform-aws-arc-document-db)
+
+[![snyk](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml/badge.svg)](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml)
 
 ## Overview
 
-SourceFuse AWS Reference Architecture (ARC) Terraform module for managing _________.
+SourceFuse AWS Reference Architecture (ARC) Terraform module to provision an Amazon DocumentDB cluster.
 
 ## Usage
 
-To see a full example, check out the [main.tf](./example/main.tf) file in the example folder.  
+To see a full example, check out the [main.tf](https://github.com/sourcefuse/terraform-aws-arc-document-db/blob/main/example/main.tf) file in the example folder.  
 
 ```hcl
-module "this" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-<module_name>"
+module "example_doc_db_cluster" {
+  source = "../" // TODO - update this
+
+  namespace   = var.namespace
+  environment = var.environment
+
+  doc_db_cluster_name = var.doc_db_cluster_name
+  cluster_size        = var.cluster_size
+  master_username     = var.master_username
+  instance_class      = var.instance_class
+  vpc_id              = data.aws_vpc.vpc_id.id
+  subnet_ids          = data.aws_subnets.private.ids
+
+  tags = module.tags.tags
+
 }
 ```
 
@@ -81,11 +96,16 @@ No resources.
 | <a name="output_reader_endpoint"></a> [reader\_endpoint](#output\_reader\_endpoint) | Read-only endpoint of the DocumentDB cluster, automatically load-balanced across replicas |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
-## Versioning  
-This project uses a `.version` file at the root of the repo which the pipeline reads from and does a git tag.  
+### Git commits
 
-When you intend to commit to `main`, you will need to increment this version. Once the project is merged,
-the pipeline will kick off and tag the latest git commit.  
+while Contributing or doing git commit please specify the breaking change in your commit message whether its major,minor or patch
+
+For Example
+
+```sh
+git commit -m "your commit message #major"
+```
+By specifying this , it will bump the version and if you dont specify this in your commit message then by default it will consider patch and will bump that accordingly
 
 ## Development
 
@@ -120,4 +140,4 @@ the pipeline will kick off and tag the latest git commit.
 ## Authors
 
 This project is authored by:
-- SourceFuse
+- SourceFuse ARC Team
