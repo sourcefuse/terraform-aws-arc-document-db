@@ -18,7 +18,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_example_doc_db_cluster"></a> [example\_doc\_db\_cluster](#module\_example\_doc\_db\_cluster) | ../ | n/a |
+| <a name="module_example_doc_db_cluster"></a> [example\_doc\_db\_cluster](#module\_example\_doc\_db\_cluster) | git::https://github.com/sourcefuse/terraform-aws-arc-document-db.git | 1.0.0 |
 | <a name="module_tags"></a> [tags](#module\_tags) | sourcefuse/arc-tags/aws | 1.2.3 |
 
 ## Resources

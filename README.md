@@ -1,5 +1,7 @@
 # [terraform-aws-arc-document-db](https://github.com/sourcefuse/terraform-aws-arc-document-db)
 
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-document-db)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-document-db)
+
 [![snyk](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml/badge.svg)](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml)
 
 ## Overview
@@ -12,7 +14,7 @@ To see a full example, check out the [main.tf](https://github.com/sourcefuse/ter
 
 ```hcl
 module "example_doc_db_cluster" {
-  source = "../" // TODO - update this
+  source = "git::https://github.com/sourcefuse/terraform-aws-arc-document-db.git?ref=1.0.0" // TODO - update this
 
   namespace   = var.namespace
   environment = var.environment

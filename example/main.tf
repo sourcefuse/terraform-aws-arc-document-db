@@ -29,7 +29,7 @@ provider "aws" {
 }
 
 module "example_doc_db_cluster" {
-  source = "../" // TODO - update this
+  source = "git::https://github.com/sourcefuse/terraform-aws-arc-document-db.git?ref=1.0.0"
 
   namespace   = var.namespace
   environment = var.environment
