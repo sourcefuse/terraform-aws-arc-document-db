@@ -1,5 +1,7 @@
 # [terraform-aws-arc-document-db](https://github.com/sourcefuse/terraform-aws-arc-document-db)
 
+[![snyk](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml/badge.svg)](https://github.com/sourcefuse/terraform-aws-arc-document-db/actions/workflows/snyk.yaml)
+
 ## Overview
 
 SourceFuse AWS Reference Architecture (ARC) Terraform module to provision an Amazon DocumentDB cluster.
