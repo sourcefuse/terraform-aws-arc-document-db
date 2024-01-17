@@ -18,10 +18,6 @@ module "tags" {
   environment = var.environment
   project     = var.project_name
 
-  extra_tags = {
-    MonoRepo     = "True"
-    MonoRepoPath = "terraform/doc_db_cluster"
-  }
 }
 
 provider "aws" {
