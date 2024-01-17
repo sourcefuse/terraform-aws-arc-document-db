@@ -14,7 +14,8 @@ To see a full example, check out the [main.tf](https://github.com/sourcefuse/ter
 
 ```hcl
 module "example_doc_db_cluster" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-arc-document-db.git?ref=1.0.0" // TODO - update this
+  source  = "sourcefuse/arc-document-db/aws"
+  version = "1.1.0"
 
   namespace   = var.namespace
   environment = var.environment
