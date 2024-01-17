@@ -25,17 +25,15 @@ provider "aws" {
 }
 
 module "example_doc_db_cluster" {
-  source = "../"
-
-  namespace   = var.namespace
-  environment = var.environment
-
+  source = "sourcefuse/arc-document-db/aws"
+  // we recommend to pin the version we aren't simply for an example reference against our latest changes.
+  namespace           = var.namespace
+  environment         = var.environment
   doc_db_cluster_name = var.doc_db_cluster_name
   cluster_size        = var.cluster_size
   master_username     = var.master_username
   instance_class      = var.instance_class
   vpc_id              = data.aws_vpc.vpc_id.id
   subnet_ids          = data.aws_subnets.private.ids
-
-  tags = module.tags.tags
+  tags                = module.tags.tags
 }
