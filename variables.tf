@@ -180,3 +180,27 @@ variable "tags" {
   description = "Additional tags to apply to all resources"
   default     = {}
 }
+
+variable "ssm_parameter_path_prefix" {
+  type        = string
+  default     = "/arc/doc_db/master_password/"
+  description = "The path prefix for the created SSM parameter e.g. '/docdb/master-password/dev'. `ssm_parameter_enabled` must be set to `true` for this to take affect."
+}
+
+variable "documentdb_host" {
+  type        = string
+  description = "The name for the DocumentDB host SSM parameter"
+  default     = "/arc/doc_db/host"
+}
+
+variable "documentdb_port" {
+  type        = string
+  description = "The name for the DocumentDB port SSM parameter"
+  default     = "/arc/doc_db/port"
+}
+
+variable "documentdb_username" {
+  type        = string
+  description = "The name for the DocumentDB username SSM parameter"
+  default     = "/arc/doc_db/username"
+}

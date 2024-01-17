@@ -18,10 +18,6 @@ module "tags" {
   environment = var.environment
   project     = var.project_name
 
-  extra_tags = {
-    MonoRepo     = "True"
-    MonoRepoPath = "terraform/doc_db_cluster"
-  }
 }
 
 provider "aws" {
@@ -29,7 +25,7 @@ provider "aws" {
 }
 
 module "example_doc_db_cluster" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-arc-document-db.git?ref=1.0.0"
+  source = "../"
 
   namespace   = var.namespace
   environment = var.environment
@@ -42,5 +38,4 @@ module "example_doc_db_cluster" {
   subnet_ids          = data.aws_subnets.private.ids
 
   tags = module.tags.tags
-
 }

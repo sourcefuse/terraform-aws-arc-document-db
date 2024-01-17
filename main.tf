@@ -44,5 +44,26 @@ module "doc_db_cluster" {
   cluster_dns_name                = var.cluster_dns_name
   reader_dns_name                 = var.reader_dns_name
   ssm_parameter_enabled           = var.ssm_parameter_enabled
+  ssm_parameter_path_prefix       = var.ssm_parameter_path_prefix
   tags                            = var.tags
+}
+
+////////////////  SSM VALUES ////////////////////////////////////////
+
+resource "aws_ssm_parameter" "documentdb_host" {
+  name  = var.documentdb_host
+  type  = "String"
+  value = module.doc_db_cluster.endpoint
+}
+
+resource "aws_ssm_parameter" "documentdb_port" {
+  name  = var.documentdb_port
+  type  = "String"
+  value = var.db_port
+}
+
+resource "aws_ssm_parameter" "documentdb_username" {
+  name  = var.documentdb_username
+  type  = "String"
+  value = module.doc_db_cluster.master_username
 }
