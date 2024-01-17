@@ -25,8 +25,8 @@ provider "aws" {
 }
 
 module "example_doc_db_cluster" {
-  source              = "sourcefuse/arc-document-db/aws"
-  version             = "1.1.0"
+  source = "sourcefuse/arc-document-db/aws"
+  // we recommend to pin the version we aren't simply for an example reference against our latest changes.
   namespace           = var.namespace
   environment         = var.environment
   doc_db_cluster_name = var.doc_db_cluster_name
