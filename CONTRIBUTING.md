@@ -81,7 +81,7 @@ By specifying this , it will bump the version and if you don't specify this in y
       // ...
     }
 
-    module "networking" {
+    module "document_db" {
       // ...
     }
     ```

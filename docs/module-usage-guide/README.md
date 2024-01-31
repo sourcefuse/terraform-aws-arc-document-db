@@ -28,7 +28,6 @@ To use the module in your Terraform configuration, include the following source 
 module "example_doc_db_cluster" {
   source = "sourcefuse/arc-document-db/aws"
   // we recommend to pin the version we aren't simply for an example reference against our latest changes.
-  version = "2.6.3"
   # insert the 6 required variables here
 }
 ```
