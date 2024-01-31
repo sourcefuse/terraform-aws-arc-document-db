@@ -92,7 +92,7 @@ Understand the security considerations related to Document DB clusters on AWS wh
 
 Follow best practices to ensure secure Document DB configurations:
 
-- [Document DB security on AWS](https://docs.aws.amazon.com/documentdb/latest/developerguide/security.html/)
+[DocumentDB security on AWS](https://docs.aws.amazon.com/documentdb/latest/developerguide/security.html)
 
 ## Contributing and Community Support
 
