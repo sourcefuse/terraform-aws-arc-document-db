@@ -6,13 +6,15 @@
 
 ## Overview
 
-SourceFuse AWS Reference Architecture (ARC) Terraform module to provision an Amazon DocumentDB cluster.
+The SourceFuse AWS Reference Architecture (ARC) Terraform module for managing AWS DocumentDB offers a streamlined solution for provisioning, configuring, and managing DocumentDB clusters within the Amazon Web Services (AWS) environment. This Terraform module is specifically designed to simplify the deployment and maintenance of DocumentDB.
+
+For more information about this repository and its usage, please see [Terraform AWS ARC Document DB Usage Guide](https://github.com/sourcefuse/terraform-aws-arc-document-db/blob/main/docs/module-usage-guide/README.md).
 
 ## Usage
 
 To see a full example, check out the [main.tf](https://github.com/sourcefuse/terraform-aws-arc-document-db/blob/main/example/main.tf) file in the example folder.  
 
-```hcl
+```tcl
 module "example_doc_db_cluster" {
   source  = "sourcefuse/arc-document-db/aws"  
   // we recommend to pin the version we aren't simply for an example reference against our latest changes.
