@@ -24,7 +24,7 @@ provider "aws" {
   region = var.region
 }
 
-module "example_doc_db_cluster" {
+module "doc_db_cluster" {
   source = "sourcefuse/arc-document-db/aws"
   // we recommend to pin the version we aren't simply for an example reference against our latest changes.
   namespace           = var.namespace
