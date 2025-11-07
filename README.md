@@ -47,7 +47,7 @@ module "example_doc_db_cluster" {
 }
 ```
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -251,7 +251,7 @@ module "example_doc_db_cluster" {
 | <a name="output_secret_id"></a> [secret\_id](#output\_secret\_id) | The ID of the secret |
 | <a name="output_security_group_arn"></a> [security\_group\_arn](#output\_security\_group\_arn) | The ARN of the security group created for the DocumentDB cluster |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the security group created for the DocumentDB cluster |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ### Git commits
 

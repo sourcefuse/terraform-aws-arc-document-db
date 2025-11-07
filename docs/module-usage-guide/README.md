@@ -64,7 +64,7 @@ For a list of outputs, see the README [Outputs](https://github.com/sourcefuse/te
 
 ### Basic Usage
 
-For basic usage, see the [example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/example) folder.
+For basic usage, see the [example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples) folder.
 
 This example will create:
 

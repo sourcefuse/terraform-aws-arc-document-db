@@ -8,6 +8,9 @@ secondary_cluster_identifier = "secondary-docdb-cluster"
 
 master_username = "docdbadmin"
 
+# Secrets Manager configuration
+secret_recovery_window_in_days = 7 # Minimum allowed value
+
 primary_instance_count   = 1
 secondary_instance_count = 1
 

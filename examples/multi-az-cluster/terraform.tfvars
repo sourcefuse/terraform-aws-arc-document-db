@@ -6,18 +6,18 @@ instance_count = 3
 instance_class = "db.r5.large"
 
 # Use existing VPC and subnets from us-east-1
-vpc_id = "vpc-0e6c09980580ecbf6"
+vpc_id = "vpc-0e6c0934456cbf6"
 subnet_ids = [
-  "subnet-064b80a494fed9835",
-  "subnet-066d0c78479b72e77"
+  "subnet-06fss80a494febhjv835",
+  "subnet-66ddf0c78479b72efdfd"
 ]
 
 # Allow access from VPC CIDR
 allowed_cidr_blocks = ["10.12.0.0/16"]
 
 # Secrets Manager configuration
-secret_name                    = "multi-az-docdb-credentials-v2"
-secret_recovery_window_in_days = 7
+# secret_name will be auto-generated as "${cluster_identifier}-credentials-${random_suffix}"
+secret_recovery_window_in_days = 7 # Minimum allowed value
 
 # KMS configuration
 kms_key_description = "DocumentDB cluster encryption key for multi-AZ cluster"
@@ -55,7 +55,7 @@ db_cluster_parameter_group_parameters = [
 ]
 
 # Tags
-environment = "dev"
+environment = "arc"
 project     = "multi-az-docdb"
 
 extra_tags = {
