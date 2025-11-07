@@ -17,20 +17,26 @@ module "documentdb_cluster" {
   instance_count = var.instance_count
   instance_class = var.instance_class
 
-  subnet_ids = var.subnet_ids
-  vpc_id     = var.vpc_id
+  subnet_config = {
+    subnet_ids = data.aws_subnets.private.ids
+  }
+  vpc_id = data.aws_vpc.main.id
 
   allowed_cidr_blocks        = var.allowed_cidr_blocks
   allowed_security_group_ids = var.allowed_security_group_ids
 
   # Enable Secrets Manager integration
-  create_secret                  = true
-  secret_name                    = var.secret_name
-  secret_recovery_window_in_days = var.secret_recovery_window_in_days
+  secret_config = {
+    create                  = true
+    name                    = null # Use auto-generated name with random suffix
+    recovery_window_in_days = var.secret_recovery_window_in_days
+  }
 
   # Enable KMS encryption
-  create_kms_key      = true
-  kms_key_description = var.kms_key_description
+  kms_config = {
+    create_key  = true
+    description = var.kms_key_description
+  }
 
   # Enhanced backup configuration
   backup_retention_period      = var.backup_retention_period
@@ -45,9 +51,11 @@ module "documentdb_cluster" {
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 
   # Custom parameter group
-  create_db_cluster_parameter_group     = true
-  db_cluster_parameter_group_family     = var.db_cluster_parameter_group_family
-  db_cluster_parameter_group_parameters = var.db_cluster_parameter_group_parameters
+  parameter_group_config = {
+    create     = true
+    family     = var.db_cluster_parameter_group_family
+    parameters = var.db_cluster_parameter_group_parameters
+  }
 
   tags = module.tags.tags
 }

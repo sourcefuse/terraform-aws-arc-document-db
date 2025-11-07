@@ -9,20 +9,20 @@ locals {
 
   # Master Password Logic
   master_password = var.master_password != null ? var.master_password : (
-    var.create_secret && length(random_password.master) > 0 ? random_password.master[0].result : null
+    var.secret_config.create && length(random_password.master) > 0 ? random_password.master[0].result : null
   )
 
   # KMS Key Configuration
-  kms_key_id = var.kms_key_id != null ? var.kms_key_id : (
-    var.create_kms_key && length(module.kms) > 0 ? module.kms[0].key_arn : null
+  kms_key_id = var.kms_config.key_id != null ? var.kms_config.key_id : (
+    var.kms_config.create_key && length(module.kms) > 0 ? module.kms[0].key_arn : null
   )
 
   # Secrets Manager Configuration
-  secret_name = var.secret_name != null ? var.secret_name : "${var.cluster_identifier}-credentials-${random_string.suffix.result}"
+  secret_name = var.secret_config.name != null ? var.secret_config.name : "${var.cluster_identifier}-credentials-${random_id.secret_suffix.hex}"
 
   # Subnet Group Configuration
-  db_subnet_group_name = var.db_subnet_group_name != null ? var.db_subnet_group_name : (
-    var.create_db_subnet_group ? "${var.name_prefix}-${var.environment}-subnet-group" : null
+  db_subnet_group_name = var.subnet_config.group_name != null ? var.subnet_config.group_name : (
+    var.subnet_config.create_group ? "${var.name_prefix}-${var.environment}-subnet-group" : null
   )
 
   # Security Group Configuration
@@ -33,8 +33,8 @@ locals {
   )
 
   # Parameter Group Configuration
-  db_cluster_parameter_group_name = var.db_cluster_parameter_group_name != null ? var.db_cluster_parameter_group_name : (
-    var.create_db_cluster_parameter_group ? "${var.name_prefix}-${var.environment}-cluster-pg" : null
+  db_cluster_parameter_group_name = var.parameter_group_config.name != null ? var.parameter_group_config.name : (
+    var.parameter_group_config.create ? "${var.name_prefix}-${var.environment}-cluster-pg" : null
   )
 
   # Event Subscription Configuration

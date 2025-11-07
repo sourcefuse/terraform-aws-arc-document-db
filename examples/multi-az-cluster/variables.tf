@@ -22,16 +22,6 @@ variable "instance_class" {
   default     = "db.r5.large"
 }
 
-variable "subnet_ids" {
-  description = "List of VPC subnet IDs across multiple AZs"
-  type        = list(string)
-}
-
-variable "vpc_id" {
-  description = "VPC ID where the security group will be created"
-  type        = string
-}
-
 variable "allowed_cidr_blocks" {
   description = "List of CIDR blocks allowed to access the DocumentDB cluster"
   type        = list(string)
@@ -42,12 +32,6 @@ variable "allowed_security_group_ids" {
   description = "List of security group IDs allowed to access the DocumentDB cluster"
   type        = list(string)
   default     = []
-}
-
-variable "secret_name" {
-  description = "Name for the Secrets Manager secret"
-  type        = string
-  default     = "multi-az-docdb-credentials"
 }
 
 variable "secret_recovery_window_in_days" {

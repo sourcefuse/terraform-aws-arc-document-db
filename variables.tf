@@ -89,42 +89,26 @@ variable "storage_encrypted" {
   default     = true
 }
 
-variable "kms_key_id" {
-  description = "The ARN for the KMS encryption key. When specifying kms_key_id, storage_encrypted needs to be set to true"
-  type        = string
-  default     = null
+variable "kms_config" {
+  description = "KMS configuration for DocumentDB encryption"
+  type = object({
+    key_id      = optional(string, null)
+    create_key  = optional(bool, false)
+    description = optional(string, "DocumentDB cluster encryption key")
+  })
+  default = {}
 }
 
-variable "create_kms_key" {
-  description = "Whether to create a KMS key for encryption"
-  type        = bool
-  default     = false
-}
-
-variable "kms_key_description" {
-  description = "Description for the KMS key"
-  type        = string
-  default     = "DocumentDB cluster encryption key"
-}
-
-variable "db_subnet_group_name" {
-  description = "Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group"
-  type        = string
-  default     = null
-}
-
-variable "create_db_subnet_group" {
-  description = "Whether to create a DB subnet group"
-  type        = bool
-  default     = true
-}
-
-variable "subnet_ids" {
-  description = "List of VPC subnet IDs"
-  type        = list(string)
-  default     = []
+variable "subnet_config" {
+  description = "Subnet configuration for DocumentDB cluster"
+  type = object({
+    group_name   = optional(string, null)
+    create_group = optional(bool, true)
+    subnet_ids   = optional(list(string), [])
+  })
+  default = {}
   validation {
-    condition     = length(var.subnet_ids) >= 2 || length(var.subnet_ids) == 0
+    condition     = length(var.subnet_config.subnet_ids) >= 2 || length(var.subnet_config.subnet_ids) == 0
     error_message = "At least 2 subnet IDs must be provided when specifying subnet_ids."
   }
 }
@@ -177,31 +161,18 @@ variable "allowed_security_group_ids" {
   default     = []
 }
 
-variable "db_cluster_parameter_group_name" {
-  description = "A cluster parameter group to associate with the cluster"
-  type        = string
-  default     = null
-}
-
-variable "create_db_cluster_parameter_group" {
-  description = "Whether to create a DB cluster parameter group"
-  type        = bool
-  default     = false
-}
-
-variable "db_cluster_parameter_group_family" {
-  description = "The DB cluster parameter group family"
-  type        = string
-  default     = "docdb4.0"
-}
-
-variable "db_cluster_parameter_group_parameters" {
-  description = "A list of DB cluster parameters to apply"
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
+variable "parameter_group_config" {
+  description = "DB cluster parameter group configuration"
+  type = object({
+    name   = optional(string, null)
+    create = optional(bool, false)
+    family = optional(string, "docdb4.0")
+    parameters = optional(list(object({
+      name  = string
+      value = string
+    })), [])
+  })
+  default = {}
 }
 
 variable "enabled_cloudwatch_logs_exports" {
@@ -245,30 +216,17 @@ variable "instance_class" {
   default     = "db.t3.medium"
 }
 
-variable "create_secret" {
-  description = "Whether to create a Secrets Manager secret for the master password"
-  type        = bool
-  default     = false
-}
-
-variable "secret_name" {
-  description = "Name for the Secrets Manager secret"
-  type        = string
-  default     = null
-}
-
-variable "secret_description" {
-  description = "Description for the Secrets Manager secret"
-  type        = string
-  default     = "DocumentDB cluster master credentials"
-}
-
-variable "secret_recovery_window_in_days" {
-  description = "Number of days that AWS Secrets Manager waits before it can delete the secret"
-  type        = number
-  default     = 7
+variable "secret_config" {
+  description = "Secrets Manager configuration for DocumentDB credentials"
+  type = object({
+    create                  = optional(bool, false)
+    name                    = optional(string, null)
+    description             = optional(string, "DocumentDB cluster master credentials")
+    recovery_window_in_days = optional(number, 7)
+  })
+  default = {}
   validation {
-    condition     = var.secret_recovery_window_in_days >= 7 && var.secret_recovery_window_in_days <= 30
+    condition     = var.secret_config.recovery_window_in_days >= 7 && var.secret_config.recovery_window_in_days <= 30
     error_message = "Secret recovery window must be between 7 and 30 days."
   }
 }
@@ -366,15 +324,6 @@ variable "availability_zones" {
   type        = list(string)
   default     = null
 }
-
-
-
-
-
-
-
-
-
 
 variable "instance_identifier_prefix" {
   description = "Creates a unique identifier beginning with the specified prefix"
@@ -537,58 +486,24 @@ variable "cloudwatch_log_kms_key_id" {
   default     = null
 }
 
-variable "create_cloudwatch_alarms" {
-  description = "Whether to create CloudWatch alarms for monitoring"
-  type        = bool
-  default     = false
-}
-
-variable "cpu_alarm_threshold" {
-  description = "The value against which the specified statistic is compared for CPU utilization"
-  type        = number
-  default     = 80
-}
-
-variable "cpu_alarm_evaluation_periods" {
-  description = "The number of periods over which data is compared to the specified threshold for CPU alarm"
-  type        = number
-  default     = 2
-}
-
-variable "cpu_alarm_period" {
-  description = "The period in seconds over which the specified statistic is applied for CPU alarm"
-  type        = number
-  default     = 300
-}
-
-variable "connection_alarm_threshold" {
-  description = "The value against which the specified statistic is compared for database connections"
-  type        = number
-  default     = 80
-}
-
-variable "connection_alarm_evaluation_periods" {
-  description = "The number of periods over which data is compared to the specified threshold for connection alarm"
-  type        = number
-  default     = 2
-}
-
-variable "connection_alarm_period" {
-  description = "The period in seconds over which the specified statistic is applied for connection alarm"
-  type        = number
-  default     = 300
-}
-
-variable "alarm_actions" {
-  description = "The list of actions to execute when this alarm transitions into an ALARM state"
-  type        = list(string)
-  default     = []
-}
-
-variable "ok_actions" {
-  description = "The list of actions to execute when this alarm transitions into an OK state"
-  type        = list(string)
-  default     = []
+variable "alarm_config" {
+  description = "CloudWatch alarm configuration for DocumentDB monitoring"
+  type = object({
+    create_alarms = optional(bool, false)
+    cpu = optional(object({
+      threshold          = optional(number, 80)
+      evaluation_periods = optional(number, 2)
+      period             = optional(number, 300)
+    }), {})
+    connections = optional(object({
+      threshold          = optional(number, 80)
+      evaluation_periods = optional(number, 2)
+      period             = optional(number, 300)
+    }), {})
+    alarm_actions = optional(list(string), [])
+    ok_actions    = optional(list(string), [])
+  })
+  default = {}
 }
 
 variable "treat_missing_data" {

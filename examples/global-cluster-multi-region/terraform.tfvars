@@ -8,9 +8,6 @@ secondary_cluster_identifier = "secondary-docdb-cluster"
 
 master_username = "docdbadmin"
 
-# Secrets Manager configuration
-secret_recovery_window_in_days = 7 # Minimum allowed value
-
 primary_instance_count   = 1
 secondary_instance_count = 1
 
@@ -18,8 +15,7 @@ primary_instance_class   = "db.r5.large"
 secondary_instance_class = "db.r5.large"
 
 # Use existing VPC
-primary_vpc_name   = "arc-poc-vpc"
-secondary_vpc_name = "sf-dev-vpc"
+primary_vpc_name = "arc-poc-vpc"
 
 # Security group rules for SourceFuse module format
 primary_ingress_rules = [

@@ -14,7 +14,7 @@ data "aws_caller_identity" "current" {}
 
 # Random password for master user
 resource "random_password" "master" {
-  count            = var.create_secret && var.master_password == null ? 1 : 0
+  count            = var.secret_config.create && var.master_password == null ? 1 : 0
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -28,14 +28,21 @@ resource "random_string" "suffix" {
   upper   = false
   special = false
 }
+
+resource "random_id" "secret_suffix" {
+  byte_length = 4
+  keepers = {
+    cluster_identifier = var.cluster_identifier
+  }
+}
 # KMS Key using SourceFuse module
 module "kms" {
-  count   = var.create_kms_key ? 1 : 0
+  count   = var.kms_config.create_key ? 1 : 0
   source  = "sourcefuse/arc-kms/aws"
   version = "0.0.1"
 
-  alias       = "alias/${var.name_prefix}-${var.environment}-docdb"
-  description = var.kms_key_description
+  alias       = "alias/${var.name_prefix}-${var.environment}-docdb-${random_string.suffix.result}"
+  description = var.kms_config.description
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -55,12 +62,16 @@ module "kms" {
 
 # Secrets Manager secret
 resource "aws_secretsmanager_secret" "this" {
-  count                          = var.create_secret ? 1 : 0
+  count                          = var.secret_config.create ? 1 : 0
   name                           = local.secret_name
-  description                    = var.secret_description
-  recovery_window_in_days        = var.secret_recovery_window_in_days
+  description                    = var.secret_config.description
+  recovery_window_in_days        = var.secret_config.recovery_window_in_days
   kms_key_id                     = local.kms_key_id
   force_overwrite_replica_secret = var.force_overwrite_replica_secret
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   dynamic "replica" {
     for_each = var.replica_region != null ? [1] : []
@@ -73,7 +84,7 @@ resource "aws_secretsmanager_secret" "this" {
 }
 
 resource "aws_secretsmanager_secret_version" "this" {
-  count     = var.create_secret ? 1 : 0
+  count     = var.secret_config.create ? 1 : 0
   secret_id = aws_secretsmanager_secret.this[0].id
   secret_string = jsonencode({
     username = var.master_username
@@ -100,10 +111,10 @@ resource "aws_docdb_global_cluster" "this" {
 
 # DB Subnet Group
 resource "aws_docdb_subnet_group" "this" {
-  count       = var.create_db_subnet_group ? 1 : 0
+  count       = var.subnet_config.create_group ? 1 : 0
   name        = local.db_subnet_group_name
   description = var.db_subnet_group_description
-  subnet_ids  = var.subnet_ids
+  subnet_ids  = var.subnet_config.subnet_ids
   tags        = module.tags.tags
 }
 
@@ -148,14 +159,14 @@ module "security_group" {
 
 # DB Cluster Parameter Group
 resource "aws_docdb_cluster_parameter_group" "this" {
-  count       = var.create_db_cluster_parameter_group ? 1 : 0
-  family      = var.db_cluster_parameter_group_family
+  count       = var.parameter_group_config.create ? 1 : 0
+  family      = var.parameter_group_config.family
   name        = local.db_cluster_parameter_group_name
   description = var.db_cluster_parameter_group_description
   tags        = module.tags.tags
 
   dynamic "parameter" {
-    for_each = var.db_cluster_parameter_group_parameters
+    for_each = var.parameter_group_config.parameters
     content {
       name         = parameter.value.name
       value        = parameter.value.value
@@ -291,18 +302,18 @@ resource "aws_cloudwatch_log_group" "profiler" {
 
 # CloudWatch Alarms
 resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
-  count               = var.create_cloudwatch_alarms ? var.instance_count : 0
+  count               = var.alarm_config.create_alarms ? var.instance_count : 0
   alarm_name          = "${aws_docdb_cluster_instance.this[count.index].identifier}-cpu-utilization"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = var.cpu_alarm_evaluation_periods
+  evaluation_periods  = var.alarm_config.cpu.evaluation_periods
   metric_name         = "CPUUtilization"
   namespace           = "AWS/DocDB"
-  period              = var.cpu_alarm_period
+  period              = var.alarm_config.cpu.period
   statistic           = "Average"
-  threshold           = var.cpu_alarm_threshold
+  threshold           = var.alarm_config.cpu.threshold
   alarm_description   = "This metric monitors DocumentDB instance CPU utilization"
-  alarm_actions       = var.alarm_actions
-  ok_actions          = var.ok_actions
+  alarm_actions       = var.alarm_config.alarm_actions
+  ok_actions          = var.alarm_config.ok_actions
   treat_missing_data  = var.treat_missing_data
 
   dimensions = {
@@ -313,18 +324,18 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "database_connections" {
-  count               = var.create_cloudwatch_alarms ? var.instance_count : 0
+  count               = var.alarm_config.create_alarms ? var.instance_count : 0
   alarm_name          = "${aws_docdb_cluster_instance.this[count.index].identifier}-database-connections"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = var.connection_alarm_evaluation_periods
+  evaluation_periods  = var.alarm_config.connections.evaluation_periods
   metric_name         = "DatabaseConnections"
   namespace           = "AWS/DocDB"
-  period              = var.connection_alarm_period
+  period              = var.alarm_config.connections.period
   statistic           = "Average"
-  threshold           = var.connection_alarm_threshold
+  threshold           = var.alarm_config.connections.threshold
   alarm_description   = "This metric monitors DocumentDB instance database connections"
-  alarm_actions       = var.alarm_actions
-  ok_actions          = var.ok_actions
+  alarm_actions       = var.alarm_config.alarm_actions
+  ok_actions          = var.alarm_config.ok_actions
   treat_missing_data  = var.treat_missing_data
 
   dimensions = {

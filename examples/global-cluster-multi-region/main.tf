@@ -23,8 +23,10 @@ module "primary_cluster" {
   instance_count = var.primary_instance_count
   instance_class = var.primary_instance_class
 
-  subnet_ids = data.aws_subnets.primary_private.ids
-  vpc_id     = data.aws_vpc.primary.id
+  subnet_config = {
+    subnet_ids = data.aws_subnets.primary_private.ids
+  }
+  vpc_id = data.aws_vpc.primary.id
   # Use security group rules
   ingress_rules = var.primary_ingress_rules
   egress_rules  = var.egress_rules
@@ -34,8 +36,12 @@ module "primary_cluster" {
   global_cluster_identifier = var.global_cluster_identifier
 
   # Security features
-  create_secret       = true
-  create_kms_key      = true
+  secret_config = {
+    create = true
+  }
+  kms_config = {
+    create_key = true
+  }
   storage_encrypted   = true
   deletion_protection = var.deletion_protection
 
@@ -62,8 +68,10 @@ module "secondary_cluster" {
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
 
-  subnet_ids = data.aws_subnets.secondary_private.ids
-  vpc_id     = data.aws_vpc.secondary.id
+  subnet_config = {
+    subnet_ids = data.aws_subnets.secondary_private.ids
+  }
+  vpc_id = data.aws_vpc.secondary.id
 
   # Use security group rules
   ingress_rules = var.secondary_ingress_rules
@@ -74,7 +82,9 @@ module "secondary_cluster" {
   is_secondary_cluster               = true
 
   # Security features (inherit from global cluster)
-  create_kms_key      = true
+  kms_config = {
+    create_key = true
+  }
   storage_encrypted   = true
   deletion_protection = var.deletion_protection
   skip_final_snapshot = var.skip_final_snapshot

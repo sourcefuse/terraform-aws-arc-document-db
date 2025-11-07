@@ -151,8 +151,3 @@ variable "primary_vpc_name" {
   description = "VPC name in primary region"
   type        = string
 }
-
-variable "secondary_vpc_name" {
-  description = "VPC name in secondary region"
-  type        = string
-}

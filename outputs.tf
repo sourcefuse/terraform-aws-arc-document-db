@@ -85,12 +85,12 @@ output "instance_endpoints" {
 
 output "db_subnet_group_name" {
   description = "The name of the DB subnet group"
-  value       = var.create_db_subnet_group ? aws_docdb_subnet_group.this[0].name : var.db_subnet_group_name
+  value       = var.subnet_config.create_group ? aws_docdb_subnet_group.this[0].name : var.subnet_config.group_name
 }
 
 output "db_cluster_parameter_group_name" {
   description = "The name of the DB cluster parameter group"
-  value       = var.create_db_cluster_parameter_group ? aws_docdb_cluster_parameter_group.this[0].name : var.db_cluster_parameter_group_name
+  value       = var.parameter_group_config.create ? aws_docdb_cluster_parameter_group.this[0].name : var.parameter_group_config.name
 }
 
 output "security_group_id" {
@@ -105,22 +105,22 @@ output "security_group_arn" {
 
 output "kms_key_id" {
   description = "The globally unique identifier for the key"
-  value       = var.create_kms_key ? module.kms[0].key_id : null
+  value       = var.kms_config.create_key ? module.kms[0].key_id : null
 }
 
 output "kms_key_arn" {
   description = "The Amazon Resource Name (ARN) of the key"
-  value       = var.create_kms_key ? module.kms[0].key_arn : null
+  value       = var.kms_config.create_key ? module.kms[0].key_arn : null
 }
 
 output "secret_arn" {
   description = "The ARN of the secret"
-  value       = var.create_secret ? aws_secretsmanager_secret.this[0].arn : null
+  value       = var.secret_config.create ? aws_secretsmanager_secret.this[0].arn : null
 }
 
 output "secret_id" {
   description = "The ID of the secret"
-  value       = var.create_secret ? aws_secretsmanager_secret.this[0].id : null
+  value       = var.secret_config.create ? aws_secretsmanager_secret.this[0].id : null
 }
 
 output "master_username" {
@@ -252,12 +252,12 @@ output "db_parameter_group_arn" {
 
 output "db_cluster_parameter_group_arn" {
   description = "The ARN of the DB cluster parameter group"
-  value       = var.create_db_cluster_parameter_group ? aws_docdb_cluster_parameter_group.this[0].arn : null
+  value       = var.parameter_group_config.create ? aws_docdb_cluster_parameter_group.this[0].arn : null
 }
 
 output "db_subnet_group_arn" {
   description = "The ARN of the DB subnet group"
-  value       = var.create_db_subnet_group ? aws_docdb_subnet_group.this[0].arn : null
+  value       = var.subnet_config.create_group ? aws_docdb_subnet_group.this[0].arn : null
 }
 
 output "event_subscription_arn" {
@@ -292,12 +292,12 @@ output "cloudwatch_log_group_profiler_arn" {
 
 output "cloudwatch_alarm_cpu_arns" {
   description = "List of ARNs for CPU utilization CloudWatch alarms"
-  value       = var.create_cloudwatch_alarms ? aws_cloudwatch_metric_alarm.cpu_utilization[*].arn : []
+  value       = var.alarm_config.create_alarms ? aws_cloudwatch_metric_alarm.cpu_utilization[*].arn : []
 }
 
 output "cloudwatch_alarm_connection_arns" {
   description = "List of ARNs for database connection CloudWatch alarms"
-  value       = var.create_cloudwatch_alarms ? aws_cloudwatch_metric_alarm.database_connections[*].arn : []
+  value       = var.alarm_config.create_alarms ? aws_cloudwatch_metric_alarm.database_connections[*].arn : []
 }
 
 output "enhanced_monitoring_role_arn" {

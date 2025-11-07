@@ -5,13 +5,6 @@ master_username    = "docdbadmin"
 instance_count = 3
 instance_class = "db.r5.large"
 
-# Use existing VPC and subnets from us-east-1
-vpc_id = "vpc-0e6c0934456cbf6"
-subnet_ids = [
-  "subnet-06fss80a494febhjv835",
-  "subnet-66ddf0c78479b72efdfd"
-]
-
 # Allow access from VPC CIDR
 allowed_cidr_blocks = ["10.12.0.0/16"]
 

@@ -28,10 +28,7 @@ data "aws_subnets" "primary_private" {
 
 data "aws_vpc" "secondary" {
   provider = aws.secondary
-  filter {
-    name   = "tag:Name"
-    values = [var.secondary_vpc_name]
-  }
+  default  = true
 }
 
 data "aws_subnets" "secondary_private" {
@@ -39,10 +36,5 @@ data "aws_subnets" "secondary_private" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.secondary.id]
-  }
-
-  filter {
-    name   = "tag:Type"
-    values = ["private"]
   }
 }

@@ -18,8 +18,10 @@ module "documentdb_cluster" {
   instance_count = var.instance_count
   instance_class = var.instance_class
 
-  subnet_ids = data.aws_subnets.private.ids
-  vpc_id     = data.aws_vpc.vpc.id
+  subnet_config = {
+    subnet_ids = data.aws_subnets.private.ids
+  }
+  vpc_id = data.aws_vpc.vpc.id
 
   # Use simple security group IDs
   security_group_ids = var.security_group_ids
