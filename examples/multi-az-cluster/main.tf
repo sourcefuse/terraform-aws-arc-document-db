@@ -50,7 +50,7 @@ module "documentdb_cluster" {
   # Enable CloudWatch logs
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 
-  # Custom parameter group
+  # Parameter group configuration
   parameter_group_config = {
     create     = true
     family     = var.db_cluster_parameter_group_family

@@ -262,12 +262,12 @@ output "db_subnet_group_arn" {
 
 output "event_subscription_arn" {
   description = "The ARN of the DocumentDB event subscription"
-  value       = var.create_event_subscription ? aws_docdb_event_subscription.this[0].arn : null
+  value       = var.event_subscription_config.create ? aws_docdb_event_subscription.this[0].arn : null
 }
 
 output "event_subscription_id" {
   description = "The ID of the DocumentDB event subscription"
-  value       = var.create_event_subscription ? aws_docdb_event_subscription.this[0].id : null
+  value       = var.event_subscription_config.create ? aws_docdb_event_subscription.this[0].id : null
 }
 
 output "cloudwatch_log_group_audit_name" {

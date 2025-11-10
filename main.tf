@@ -166,13 +166,13 @@ resource "aws_docdb_cluster_parameter_group" "this" {
 
 # DocumentDB Event Subscription
 resource "aws_docdb_event_subscription" "this" {
-  count            = var.create_event_subscription ? 1 : 0
+  count            = var.event_subscription_config.create ? 1 : 0
   name             = local.event_subscription_name
-  sns_topic_arn    = var.sns_topic_arn
-  source_type      = var.event_source_type
-  source_ids       = var.event_source_ids
-  event_categories = var.event_categories
-  enabled          = var.event_subscription_enabled
+  sns_topic_arn    = var.event_subscription_config.sns_topic_arn
+  source_type      = var.event_subscription_config.source_type
+  source_ids       = var.event_subscription_config.source_ids
+  event_categories = var.event_subscription_config.event_categories
+  enabled          = var.event_subscription_config.enabled
   tags             = var.tags
 }
 

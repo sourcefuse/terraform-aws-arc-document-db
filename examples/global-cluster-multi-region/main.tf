@@ -91,8 +91,7 @@ module "secondary_cluster" {
 
   # Monitoring
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
-
-  tags = module.tags.tags
+  tags                            = module.tags.tags
 
   depends_on = [module.primary_cluster]
 }

@@ -344,8 +344,6 @@ variable "instance_promotion_tiers" {
   }
 }
 
-
-
 variable "monitoring_interval" {
   description = "The interval for collecting enhanced monitoring metrics. Valid values: 0, 1, 5, 10, 15, 30, 60"
   type        = number
@@ -419,53 +417,25 @@ variable "secret_version_stages" {
   default     = null
 }
 
-variable "create_event_subscription" {
-  description = "Whether to create a DocumentDB event subscription"
-  type        = bool
-  default     = false
-}
-
-variable "event_subscription_name" {
-  description = "Name of the event subscription"
-  type        = string
-  default     = null
-}
-
-variable "sns_topic_arn" {
-  description = "SNS topic ARN for event notifications"
-  type        = string
-  default     = null
-}
-
-variable "event_source_type" {
-  description = "Type of source that will be generating the events. Valid values: db-instance, db-cluster, db-parameter-group, db-security-group, db-snapshot, db-cluster-snapshot"
-  type        = string
-  default     = "db-cluster"
+variable "event_subscription_config" {
+  description = "Configuration for RDS event subscription"
+  type = object({
+    create           = optional(bool, false)
+    name             = optional(string, null)
+    sns_topic_arn    = optional(string, null)
+    enabled          = optional(bool, true)
+    source_type      = optional(string, "db-cluster")
+    source_ids       = optional(list(string), [])
+    event_categories = optional(list(string), [])
+  })
+  default = {}
   validation {
     condition = contains([
       "db-instance", "db-cluster", "db-parameter-group",
       "db-security-group", "db-snapshot", "db-cluster-snapshot"
-    ], var.event_source_type)
+    ], var.event_subscription_config.source_type)
     error_message = "Event source type must be one of: db-instance, db-cluster, db-parameter-group, db-security-group, db-snapshot, db-cluster-snapshot."
   }
-}
-
-variable "event_source_ids" {
-  description = "List of identifiers of the event sources for which events will be returned"
-  type        = list(string)
-  default     = []
-}
-
-variable "event_categories" {
-  description = "List of event categories for a SourceType that you want to subscribe to"
-  type        = list(string)
-  default     = []
-}
-
-variable "event_subscription_enabled" {
-  description = "Whether the subscription is enabled"
-  type        = bool
-  default     = true
 }
 
 variable "cloudwatch_log_retention_in_days" {

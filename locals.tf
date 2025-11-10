@@ -38,5 +38,5 @@ locals {
   )
 
   # Event Subscription Configuration
-  event_subscription_name = var.event_subscription_name != null ? var.event_subscription_name : "${var.name_prefix}-${var.environment}-events"
+  event_subscription_name = var.event_subscription_config.name != null ? var.event_subscription_config.name : "${var.name_prefix}-${var.environment}-events"
 }
