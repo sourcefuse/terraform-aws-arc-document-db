@@ -1,14 +1,3 @@
-# Tags module
-module "tags" {
-  source  = "sourcefuse/arc-tags/aws"
-  version = "1.2.5"
-
-  environment = var.environment
-  project     = var.name_prefix
-
-  extra_tags = var.tags
-}
-
 # Data source for current AWS account
 data "aws_caller_identity" "current" {}
 
@@ -57,7 +46,7 @@ module "kms" {
       }
     ]
   })
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 # Secrets Manager secret
@@ -80,7 +69,7 @@ resource "aws_secretsmanager_secret" "this" {
       kms_key_id = var.replica_kms_key_id
     }
   }
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 resource "aws_secretsmanager_secret_version" "this" {
@@ -115,7 +104,7 @@ resource "aws_docdb_subnet_group" "this" {
   name        = local.db_subnet_group_name
   description = var.db_subnet_group_description
   subnet_ids  = var.subnet_config.subnet_ids
-  tags        = module.tags.tags
+  tags        = var.tags
 }
 
 # Security Group
@@ -154,7 +143,7 @@ module "security_group" {
     cidr_block  = "0.0.0.0/0"
   }]
 
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 # DB Cluster Parameter Group
@@ -163,7 +152,7 @@ resource "aws_docdb_cluster_parameter_group" "this" {
   family      = var.parameter_group_config.family
   name        = local.db_cluster_parameter_group_name
   description = var.db_cluster_parameter_group_description
-  tags        = module.tags.tags
+  tags        = var.tags
 
   dynamic "parameter" {
     for_each = var.parameter_group_config.parameters
@@ -184,7 +173,7 @@ resource "aws_docdb_event_subscription" "this" {
   source_ids       = var.event_source_ids
   event_categories = var.event_categories
   enabled          = var.event_subscription_enabled
-  tags             = module.tags.tags
+  tags             = var.tags
 }
 
 # DocumentDB Cluster
@@ -235,7 +224,7 @@ resource "aws_docdb_cluster" "this" {
   # Logging Configuration
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 
-  tags = module.tags.tags
+  tags = var.tags
 
   lifecycle {
     ignore_changes = [
@@ -276,7 +265,7 @@ resource "aws_docdb_cluster_instance" "this" {
   copy_tags_to_snapshot = var.copy_tags_to_snapshot
 
   tags = merge(
-    module.tags.tags,
+    var.tags,
     {
       Name = var.instance_identifier_prefix != null ? "${var.instance_identifier_prefix}-${count.index + 1}" : "${local.cluster_identifier}-${count.index + 1}"
     }
@@ -289,7 +278,7 @@ resource "aws_cloudwatch_log_group" "audit" {
   name              = "/aws/docdb/${aws_docdb_cluster.this.cluster_identifier}/audit"
   retention_in_days = var.cloudwatch_log_retention_in_days
   kms_key_id        = var.cloudwatch_log_kms_key_id
-  tags              = module.tags.tags
+  tags              = var.tags
 }
 
 resource "aws_cloudwatch_log_group" "profiler" {
@@ -297,7 +286,7 @@ resource "aws_cloudwatch_log_group" "profiler" {
   name              = "/aws/docdb/${aws_docdb_cluster.this.cluster_identifier}/profiler"
   retention_in_days = var.cloudwatch_log_retention_in_days
   kms_key_id        = var.cloudwatch_log_kms_key_id
-  tags              = module.tags.tags
+  tags              = var.tags
 }
 
 # CloudWatch Alarms
@@ -320,7 +309,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
     DBInstanceIdentifier = aws_docdb_cluster_instance.this[count.index].identifier
   }
 
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "database_connections" {
@@ -342,7 +331,7 @@ resource "aws_cloudwatch_metric_alarm" "database_connections" {
     DBInstanceIdentifier = aws_docdb_cluster_instance.this[count.index].identifier
   }
 
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 # IAM Role for Enhanced Monitoring
@@ -363,11 +352,18 @@ resource "aws_iam_role" "enhanced_monitoring" {
     ]
   })
 
-  tags = module.tags.tags
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "enhanced_monitoring" {
   count      = var.monitoring_interval > 0 && var.create_monitoring_role ? 1 : 0
   role       = aws_iam_role.enhanced_monitoring[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+}
+
+# Attach additional user-provided policies to default role
+resource "aws_iam_role_policy_attachment" "additional" {
+  count      = var.monitoring_interval > 0 && var.create_monitoring_role ? 1 : 0
+  role       = aws_iam_role.enhanced_monitoring[0].name
+  policy_arn = var.additional_policy_arns[count.index]
 }

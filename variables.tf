@@ -515,3 +515,8 @@ variable "treat_missing_data" {
     error_message = "Treat missing data must be one of: breaching, notBreaching, ignore, missing."
   }
 }
+variable "additional_policy_arns" {
+  description = "List of additional IAM policy ARNs to attach to the Lambda role"
+  type        = list(string)
+  default     = []
+}
