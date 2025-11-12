@@ -34,11 +34,6 @@ variable "vpc_name" {
   default     = "arc-poc-vpc"
 }
 
-variable "security_group_ids" {
-  description = "List of security group IDs to associate with the DocumentDB cluster"
-  type        = list(string)
-  default     = []
-}
 
 variable "backup_retention_period" {
   description = "The days to retain backups for"

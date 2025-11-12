@@ -22,8 +22,7 @@ module "documentdb_cluster" {
   }
   vpc_id = data.aws_vpc.main.id
 
-  allowed_cidr_blocks        = var.allowed_cidr_blocks
-  allowed_security_group_ids = var.allowed_security_group_ids
+  security_group_data = local.security_group_data
 
   # Enable Secrets Manager integration
   secret_config = {

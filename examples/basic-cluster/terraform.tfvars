@@ -7,8 +7,6 @@ vpc_name = "arc-poc-vpc"
 instance_count = 1
 instance_class = "db.t3.medium"
 
-# Use existing security groups or let module create one
-security_group_ids = []
 
 backup_retention_period      = 7
 preferred_backup_window      = "07:00-09:00"

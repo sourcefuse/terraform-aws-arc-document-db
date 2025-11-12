@@ -27,7 +27,6 @@ locals {
 
   # Security Group Configuration
   security_group_ids = concat(
-    var.vpc_security_group_ids,
     var.security_group_ids,
     var.create_security_group && length(module.security_group) > 0 ? [module.security_group[0].id] : []
   )

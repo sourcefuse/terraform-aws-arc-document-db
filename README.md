@@ -20,7 +20,7 @@ To see a full example, check out the [main.tf](https://github.com/sourcefuse/ter
 ```tcl
 module "example_doc_db_cluster" {
   source  = "sourcefuse/arc-document-db/aws"  
-  // we recommend to pin the version we aren't simply for an example reference against our latest changes.
+
   cluster_identifier = var.cluster_identifier
   master_username    = var.master_username
   master_password    = var.master_password
@@ -28,11 +28,12 @@ module "example_doc_db_cluster" {
   instance_count = var.instance_count
   instance_class = var.instance_class
 
-  subnet_ids = data.aws_subnets.private.ids
-  vpc_id     = data.aws_vpc.vpc.id
+  subnet_config = {
+    subnet_ids = data.aws_subnets.private.ids
+  }
+  vpc_id = data.aws_vpc.vpc.id
 
-  # Use simple security group IDs
-  security_group_ids = var.security_group_ids
+ security_group_data           = local.security_group_data
 
   backup_retention_period      = var.backup_retention_period
   preferred_backup_window      = var.preferred_backup_window
@@ -43,7 +44,6 @@ module "example_doc_db_cluster" {
   deletion_protection = var.deletion_protection
 
   tags = module.tags.tags
-
 }
 ```
 

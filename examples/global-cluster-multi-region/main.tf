@@ -28,8 +28,7 @@ module "primary_cluster" {
   }
   vpc_id = data.aws_vpc.primary.id
   # Use security group rules
-  ingress_rules = var.primary_ingress_rules
-  egress_rules  = var.egress_rules
+  security_group_data = local.primary_security_group_data
 
   # Global cluster configuration
   create_global_cluster     = true
@@ -74,8 +73,7 @@ module "secondary_cluster" {
   vpc_id = data.aws_vpc.secondary.id
 
   # Use security group rules
-  ingress_rules = var.secondary_ingress_rules
-  egress_rules  = var.egress_rules
+  security_group_data = local.secondary_security_group_data
 
   # Global cluster configuration
   existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier

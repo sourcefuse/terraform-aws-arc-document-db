@@ -26,7 +26,7 @@ This example demonstrates how to create a highly available DocumentDB cluster wi
 
 1. Copy the example tfvars file:
    ```bash
-   cp terraform.tfvars.example terraform.tfvars
+   terraform.tfvars
    ```
 
 2. Edit `terraform.tfvars` with your specific values:

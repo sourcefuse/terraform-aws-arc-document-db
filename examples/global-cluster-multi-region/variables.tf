@@ -16,51 +16,6 @@ variable "extra_tags" {
   default     = {}
 }
 
-variable "primary_ingress_rules" {
-  description = "List of ingress rules for the primary cluster security group"
-  type = list(object({
-    description = optional(string, null)
-    cidr_block  = optional(string, null)
-    from_port   = number
-    ip_protocol = string
-    to_port     = string
-    self        = optional(bool, false)
-  }))
-  default = []
-}
-
-variable "secondary_ingress_rules" {
-  description = "List of ingress rules for the secondary cluster security group"
-  type = list(object({
-    description = optional(string, null)
-    cidr_block  = optional(string, null)
-    from_port   = number
-    ip_protocol = string
-    to_port     = string
-    self        = optional(bool, false)
-  }))
-  default = []
-}
-
-variable "egress_rules" {
-  description = "List of egress rules for the security groups"
-  type = list(object({
-    description                   = optional(string, null)
-    cidr_block                    = optional(string, null)
-    destination_security_group_id = optional(string, null)
-    from_port                     = number
-    ip_protocol                   = string
-    to_port                       = string
-    prefix_list_id                = optional(string, null)
-  }))
-  default = [{
-    description = "All outbound traffic"
-    from_port   = -1
-    to_port     = "-1"
-    ip_protocol = "-1"
-    cidr_block  = "0.0.0.0/0"
-  }]
-}
 
 variable "global_cluster_identifier" {
   description = "The global cluster identifier"

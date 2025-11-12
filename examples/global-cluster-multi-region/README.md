@@ -41,7 +41,7 @@ This example demonstrates how to create a DocumentDB Global Cluster with primary
 
 2. **Copy and configure variables**:
    ```bash
-   cp terraform.tfvars.example terraform.tfvars
+    terraform.tfvars
    # Edit terraform.tfvars with your actual VPC/subnet IDs
    ```
 

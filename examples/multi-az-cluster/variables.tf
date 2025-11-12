@@ -22,17 +22,6 @@ variable "instance_class" {
   default     = "db.r5.large"
 }
 
-variable "allowed_cidr_blocks" {
-  description = "List of CIDR blocks allowed to access the DocumentDB cluster"
-  type        = list(string)
-  default     = []
-}
-
-variable "allowed_security_group_ids" {
-  description = "List of security group IDs allowed to access the DocumentDB cluster"
-  type        = list(string)
-  default     = []
-}
 
 variable "secret_recovery_window_in_days" {
   description = "Number of days that AWS Secrets Manager waits before it can delete the secret"
@@ -124,4 +113,9 @@ variable "extra_tags" {
   description = "Additional tags to apply to resources"
   type        = map(string)
   default     = {}
+}
+variable "vpc_name" {
+  description = "Name of the VPC to use"
+  type        = string
+  default     = "arc-poc-vpc"
 }

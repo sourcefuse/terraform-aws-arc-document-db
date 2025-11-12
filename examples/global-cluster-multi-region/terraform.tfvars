@@ -17,27 +17,6 @@ secondary_instance_class = "db.r5.large"
 # Use existing VPC
 primary_vpc_name = "arc-poc-vpc"
 
-# Security group rules for SourceFuse module format
-primary_ingress_rules = [
-  {
-    description = "DocumentDB access from VPC"
-    from_port   = 27017
-    to_port     = 27017
-    ip_protocol = "tcp"
-    cidr_block  = "10.12.0.0/16"
-  }
-]
-
-secondary_ingress_rules = [
-  {
-    description = "DocumentDB access from VPC"
-    from_port   = 27017
-    to_port     = 27017
-    ip_protocol = "tcp"
-    cidr_block  = "172.31.0.0/16"
-  }
-]
-
 backup_retention_period = 7
 deletion_protection     = false
 skip_final_snapshot     = true

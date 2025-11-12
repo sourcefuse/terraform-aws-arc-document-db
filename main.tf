@@ -113,35 +113,11 @@ module "security_group" {
   source  = "sourcefuse/arc-security-group/aws"
   version = "0.0.2"
 
-  name        = "${var.name_prefix}-${var.environment}-sg"
-  description = "Security group for DocumentDB cluster"
-  vpc_id      = var.vpc_id
-
-  # Use provided rules or generate from legacy variables
-  ingress_rules = length(var.ingress_rules) > 0 ? var.ingress_rules : concat(
-    length(var.allowed_cidr_blocks) > 0 ? [{
-      description = "DocumentDB access from CIDR blocks"
-      from_port   = var.port
-      to_port     = var.port
-      ip_protocol = "tcp"
-      cidr_block  = var.allowed_cidr_blocks[0]
-    }] : [],
-    [for sg_id in var.allowed_security_group_ids : {
-      description = "DocumentDB access from security group"
-      from_port   = var.port
-      to_port     = var.port
-      ip_protocol = "tcp"
-      self        = true
-    }]
-  )
-
-  egress_rules = length(var.egress_rules) > 0 ? var.egress_rules : [{
-    description = "All outbound traffic"
-    from_port   = -1
-    to_port     = "-1"
-    ip_protocol = "-1"
-    cidr_block  = "0.0.0.0/0"
-  }]
+  name          = "${var.name_prefix}-${var.environment}-sg"
+  description   = "Security group for DocumentDB cluster"
+  vpc_id        = var.vpc_id
+  ingress_rules = var.security_group_data.ingress_rules
+  egress_rules  = var.security_group_data.egress_rules
 
   tags = var.tags
 }

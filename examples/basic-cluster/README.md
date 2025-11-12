@@ -20,7 +20,7 @@ This example demonstrates how to create a minimal DocumentDB cluster with a sing
 
 1. Copy the example tfvars file:
    ```bash
-   cp terraform.tfvars.example terraform.tfvars
+   terraform.tfvars
    ```
 
 2. Edit `terraform.tfvars` with your specific values:

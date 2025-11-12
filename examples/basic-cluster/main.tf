@@ -23,8 +23,7 @@ module "documentdb_cluster" {
   }
   vpc_id = data.aws_vpc.vpc.id
 
-  # Use simple security group IDs
-  security_group_ids = var.security_group_ids
+  security_group_data = local.security_group_data
 
   backup_retention_period      = var.backup_retention_period
   preferred_backup_window      = var.preferred_backup_window

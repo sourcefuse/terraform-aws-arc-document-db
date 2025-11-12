@@ -74,7 +74,7 @@ variable "final_snapshot_identifier" {
 variable "apply_immediately" {
   description = "Specifies whether any cluster modifications are applied immediately, or during the next maintenance window"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "auto_minor_version_upgrade" {
@@ -113,12 +113,6 @@ variable "subnet_config" {
   }
 }
 
-variable "vpc_security_group_ids" {
-  description = "List of VPC security groups to associate"
-  type        = list(string)
-  default     = []
-}
-
 variable "create_security_group" {
   description = "Whether to create a security group for the DocumentDB cluster"
   type        = bool
@@ -137,29 +131,37 @@ variable "security_group_ids" {
   default     = []
 }
 
-variable "ingress_rules" {
-  description = "List of ingress rules for the security group"
-  type        = list(any)
-  default     = []
+
+variable "security_group_data" {
+  type = object({
+    security_group_ids_to_attach = optional(list(string), [])
+    create                       = optional(bool, true)
+    description                  = optional(string, null)
+    ingress_rules = optional(list(object({
+      description              = optional(string, null)
+      cidr_block               = optional(string, null)
+      source_security_group_id = optional(string, null)
+      from_port                = number
+      ip_protocol              = string
+      to_port                  = string
+      self                     = optional(bool, false)
+    })), [])
+    egress_rules = optional(list(object({
+      description                   = optional(string, null)
+      cidr_block                    = optional(string, null)
+      destination_security_group_id = optional(string, null)
+      from_port                     = number
+      ip_protocol                   = string
+      to_port                       = string
+      prefix_list_id                = optional(string, null)
+    })), [])
+  })
+  description = "(optional) Security Group data"
+  default = {
+    create = false
+  }
 }
 
-variable "egress_rules" {
-  description = "List of egress rules for the security group"
-  type        = list(any)
-  default     = []
-}
-
-variable "allowed_cidr_blocks" {
-  description = "List of CIDR blocks allowed to access the DocumentDB cluster (legacy support)"
-  type        = list(string)
-  default     = []
-}
-
-variable "allowed_security_group_ids" {
-  description = "List of security group IDs allowed to access the DocumentDB cluster (legacy support)"
-  type        = list(string)
-  default     = []
-}
 
 variable "parameter_group_config" {
   description = "DB cluster parameter group configuration"
