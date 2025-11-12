@@ -10,12 +10,6 @@ variable "project" {
   default     = "global-docdb"
 }
 
-variable "extra_tags" {
-  description = "Additional tags to apply to resources"
-  type        = map(string)
-  default     = {}
-}
-
 
 variable "global_cluster_identifier" {
   description = "The global cluster identifier"

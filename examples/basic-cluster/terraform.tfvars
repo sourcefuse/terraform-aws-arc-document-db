@@ -19,8 +19,3 @@ skip_final_snapshot = true
 # Tags module configuration
 environment = "dev"
 project     = "basic-docdb"
-
-extra_tags = {
-  Owner = "terraform"
-  Team  = "platform"
-}

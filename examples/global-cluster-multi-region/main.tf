@@ -6,7 +6,6 @@ module "tags" {
   environment = var.environment
   project     = var.project
 
-  extra_tags = var.extra_tags
 }
 
 ## Primary cluster in us-east-1

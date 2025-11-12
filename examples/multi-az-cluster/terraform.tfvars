@@ -5,9 +5,6 @@ master_username    = "docdbadmin"
 instance_count = 3
 instance_class = "db.r5.large"
 
-# Allow access from VPC CIDR
-allowed_cidr_blocks = ["10.12.0.0/16"]
-
 # Secrets Manager configuration
 # secret_name will be auto-generated as "${cluster_identifier}-credentials-${random_suffix}"
 secret_recovery_window_in_days = 7 # Minimum allowed value
@@ -50,8 +47,3 @@ db_cluster_parameter_group_parameters = [
 # Tags
 environment = "arc"
 project     = "multi-az-docdb"
-
-extra_tags = {
-  Purpose = "multi-az-testing"
-  Owner   = "terraform"
-}

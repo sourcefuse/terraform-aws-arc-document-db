@@ -4,8 +4,6 @@ module "tags" {
 
   environment = var.environment
   project     = var.project
-
-  extra_tags = var.extra_tags
 }
 
 module "documentdb_cluster" {

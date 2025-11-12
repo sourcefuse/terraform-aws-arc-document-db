@@ -77,12 +77,6 @@ variable "project" {
   default     = "basic-docdb"
 }
 
-variable "extra_tags" {
-  description = "Additional tags to apply to resources"
-  type        = map(string)
-  default     = {}
-}
-
 variable "skip_final_snapshot" {
   description = "Skip final snapshot when destroying cluster"
   type        = bool

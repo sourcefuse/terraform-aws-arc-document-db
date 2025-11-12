@@ -109,11 +109,6 @@ variable "project" {
   default     = "multi-az-docdb"
 }
 
-variable "extra_tags" {
-  description = "Additional tags to apply to resources"
-  type        = map(string)
-  default     = {}
-}
 variable "vpc_name" {
   description = "Name of the VPC to use"
   type        = string
