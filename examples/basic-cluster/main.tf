@@ -11,7 +11,6 @@ module "documentdb_cluster" {
 
   cluster_identifier = var.cluster_identifier
   master_username    = var.master_username
-  master_password    = var.master_password
 
   instance_count = var.instance_count
   instance_class = var.instance_class

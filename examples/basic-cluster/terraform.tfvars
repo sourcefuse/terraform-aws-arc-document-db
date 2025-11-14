@@ -1,6 +1,5 @@
 cluster_identifier = "basic-docdb-cluster"
 master_username    = "docdbadmin"
-master_password    = "SecurePassword123!"
 
 vpc_name = "arc-poc-vpc"
 

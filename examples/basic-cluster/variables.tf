@@ -10,11 +10,6 @@ variable "master_username" {
   default     = "docdbadmin"
 }
 
-variable "master_password" {
-  description = "Password for the master DB user"
-  type        = string
-  sensitive   = true
-}
 
 variable "instance_count" {
   description = "Number of instances in the cluster"
