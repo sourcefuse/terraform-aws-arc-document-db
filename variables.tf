@@ -30,6 +30,12 @@ variable "master_username" {
   }
 }
 
+variable "manage_master_user_password" {
+  description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
+  type        = bool
+  default     = true
+}
+
 variable "master_password" {
   description = "Password for the master DB user. If not provided and create_secret is true, will be auto-generated"
   type        = string
@@ -295,13 +301,6 @@ variable "database_name" {
   type        = string
   default     = null
 }
-
-variable "manage_master_user_password" {
-  description = "Set to true to allow RDS to manage the master user password in Secrets Manager"
-  type        = bool
-  default     = true
-}
-
 
 variable "copy_tags_to_snapshot" {
   description = "Copy all Cluster tags to snapshots"
