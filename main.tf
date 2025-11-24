@@ -159,14 +159,17 @@ resource "aws_docdb_cluster" "this" {
   cluster_identifier_prefix = var.cluster_identifier_prefix
   global_cluster_identifier = var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null)
 
+
   # Engine Configuration
   engine         = var.engine
   engine_version = var.engine_version
 
   # Authentication
-  master_username             = var.is_secondary_cluster ? null : var.master_username
-  master_password             = var.is_secondary_cluster || var.manage_master_user_password ? null : local.master_password
-  manage_master_user_password = var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
+  # For secondary clusters: only specify username when explicitly provided (conversion scenarios)
+  # For fresh global cluster creation, leave username null so AWS manages authentication automatically
+  master_username             = var.is_secondary_cluster ? var.master_username_for_secondary_cluster : var.master_username
+  master_password             = var.is_secondary_cluster ? null : (var.create_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
+  manage_master_user_password = var.create_global_cluster || var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
 
 
   # Database Configuration
@@ -203,6 +206,16 @@ resource "aws_docdb_cluster" "this" {
   tags = var.tags
 
   lifecycle {
+    precondition {
+      condition     = !var.is_secondary_cluster || var.existing_global_cluster_identifier != null
+      error_message = "existing_global_cluster_identifier is required when is_secondary_cluster is true."
+    }
+
+    precondition {
+      condition     = !(var.create_global_cluster && var.manage_master_user_password) && !(var.is_secondary_cluster && var.manage_master_user_password)
+      error_message = "manage_master_user_password is not supported for global clusters. Set manage_master_user_password = false and provide an explicit master_password or use secret_config.create = true."
+    }
+
     ignore_changes = [
       master_password,
       global_cluster_identifier,

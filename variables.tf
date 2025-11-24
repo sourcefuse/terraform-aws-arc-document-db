@@ -270,6 +270,12 @@ variable "existing_global_cluster_identifier" {
   default     = null
 }
 
+variable "master_username_for_secondary_cluster" {
+  description = "Username for secondary clusters. Set this only when joining external/existing global clusters (conversion scenarios). Leave null for fresh global cluster creation where AWS manages authentication automatically."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "A map of tags to assign to the resource"
   type        = map(string)

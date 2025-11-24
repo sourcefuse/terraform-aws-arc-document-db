@@ -134,10 +134,49 @@ cluster_identifier = var.cluster_identifier
 This example demonstrates a global DocumentDB cluster spanning multiple AWS regions:
 
 - Primary cluster in us-east-1
-- Secondary cluster in us-east-2
+- Secondary cluster in us-west-2
 - Cross-region replication
 - Region-specific configurations
 - Disaster recovery setup
+
+**Important Notes for Global Clusters**:
+
+**Two Different Scenarios:**
+
+1. **Fresh Global Cluster Creation** (New Deployment):
+   - Primary cluster: Provide `master_username` and set `manage_master_user_password = false`
+   - Secondary cluster: Do NOT provide `master_username` - AWS manages authentication automatically
+   - Set `manage_master_user_password = false` for both clusters
+
+2. **Conversion Scenarios** (Existing → Global):
+   - Primary cluster: Use existing configuration with `master_username` and set `manage_master_user_password = false`
+   - Secondary cluster: Use `master_username_for_secondary_cluster = "existing-username"` to match primary
+   - Set `manage_master_user_password = false` for both clusters
+
+**General Rules:**
+- **Password Management**: AWS managed passwords (`manage_master_user_password = true`) are not supported for global clusters
+- Always set `manage_master_user_password = false` for both primary and secondary clusters
+- Use explicit passwords or Secrets Manager integration (`secret_config.create = true`)
+
+**Configuration Examples:**
+
+Fresh Global Cluster (Secondary):
+```hcl
+module "secondary_cluster" {
+  is_secondary_cluster = true
+  manage_master_user_password = false
+  # Do NOT set master_username or master_username_for_secondary_cluster
+}
+```
+
+Conversion Scenario (Secondary):
+```hcl
+module "secondary_cluster" {
+  is_secondary_cluster = true
+  master_username_for_secondary_cluster = "existing-username"  # Must match primary
+  manage_master_user_password = false
+}
+```
 
 ```hcl
 # Primary cluster in us-east-1
@@ -150,6 +189,8 @@ module "primary_cluster" {
 
   cluster_identifier = var.primary_cluster_identifier
   master_username    = var.master_username
+  # Note: manage_master_user_password is not supported for global clusters
+  manage_master_user_password = false
 
   instance_count = var.primary_instance_count
   instance_class = var.primary_instance_class
@@ -194,6 +235,12 @@ module "secondary_cluster" {
   }
 
   cluster_identifier = var.secondary_cluster_identifier
+  # Note: For fresh global cluster creation, don't specify master_username for secondary clusters
+  # AWS manages authentication automatically. Only use master_username_for_secondary_cluster
+  # when joining existing/external global clusters (conversion scenarios)
+  # master_username_for_secondary_cluster = var.master_username  # Uncomment only for conversion scenarios
+  # Note: manage_master_user_password is not supported for global clusters
+  manage_master_user_password = false
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
