@@ -90,17 +90,31 @@ resource "aws_secretsmanager_secret_version" "this" {
 }
 
 # DocumentDB Global Cluster
-resource "aws_docdb_global_cluster" "this" {
-  count                        = var.create_global_cluster ? 1 : 0
-  global_cluster_identifier    = local.global_cluster_identifier
-  source_db_cluster_identifier = var.source_db_cluster_identifier
+# Note: source_db_cluster_identifier should only be used for EXTERNAL clusters
+# For Terraform-managed clusters, create empty global cluster and let cluster join it
+# DocumentDB Global Cluster - Fresh creation only
+resource "aws_docdb_global_cluster" "fresh" {
+  count                     = var.create_global_cluster ? 1 : 0
+  global_cluster_identifier = local.global_cluster_identifier
 
-  # For fresh global cluster creation (no source cluster)
-  engine              = var.source_db_cluster_identifier == null ? var.engine : null
-  engine_version      = var.source_db_cluster_identifier == null ? var.engine_version : null
-  storage_encrypted   = var.source_db_cluster_identifier == null ? var.storage_encrypted : null
-  deletion_protection = var.source_db_cluster_identifier == null ? var.deletion_protection : null
-  database_name       = var.source_db_cluster_identifier == null ? var.database_name : null
+  # Use source cluster identifier for external clusters only
+  source_db_cluster_identifier = local.source_cluster_identifier
+
+  # These are only set when creating a fresh global cluster (no source cluster)
+  engine              = local.source_cluster_identifier == null ? var.engine : null
+  engine_version      = local.source_cluster_identifier == null ? var.engine_version : null
+  storage_encrypted   = local.source_cluster_identifier == null ? var.storage_encrypted : null
+  deletion_protection = local.source_cluster_identifier == null ? var.deletion_protection : null
+  database_name       = local.source_cluster_identifier == null ? var.database_name : null
+}
+
+# DocumentDB Global Cluster - Conversion scenario
+resource "aws_docdb_global_cluster" "conversion" {
+  count                        = var.convert_to_global_cluster ? 1 : 0
+  global_cluster_identifier    = local.global_cluster_identifier
+  source_db_cluster_identifier = aws_docdb_cluster.this.arn
+
+  depends_on = [aws_docdb_cluster.this]
 }
 
 # DB Subnet Group
@@ -162,7 +176,7 @@ resource "aws_docdb_cluster" "this" {
   # Basic Configuration
   cluster_identifier        = local.cluster_identifier
   cluster_identifier_prefix = var.cluster_identifier_prefix
-  global_cluster_identifier = var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null)
+  global_cluster_identifier = var.convert_to_global_cluster ? null : (var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].id : null))
 
 
   # Engine Configuration
@@ -218,7 +232,12 @@ resource "aws_docdb_cluster" "this" {
     }
 
     precondition {
-      condition     = !(var.create_global_cluster && var.manage_master_user_password) && !(var.is_secondary_cluster && var.manage_master_user_password)
+      condition     = !(var.create_global_cluster && var.convert_to_global_cluster)
+      error_message = "create_global_cluster and convert_to_global_cluster cannot both be true. Use create_global_cluster for fresh global clusters, or convert_to_global_cluster for converting existing clusters."
+    }
+
+    precondition {
+      condition     = !(var.create_global_cluster && var.manage_master_user_password) && !(var.is_secondary_cluster && var.manage_master_user_password) && !(var.convert_to_global_cluster && var.manage_master_user_password)
       error_message = "manage_master_user_password is not supported for global clusters. Set manage_master_user_password = false and provide an explicit master_password or use secret_config.create = true."
     }
 
@@ -231,8 +250,7 @@ resource "aws_docdb_cluster" "this" {
 
   depends_on = [
     aws_docdb_subnet_group.this,
-    aws_docdb_cluster_parameter_group.this,
-    aws_docdb_global_cluster.this
+    aws_docdb_cluster_parameter_group.this
   ]
 }
 

@@ -3,9 +3,12 @@ locals {
   cluster_identifier = var.cluster_identifier != null ? var.cluster_identifier : "${var.name_prefix}-${var.environment}"
 
   # Global Cluster Configuration
-  global_cluster_identifier = var.create_global_cluster ? (
+  global_cluster_identifier = var.create_global_cluster || var.convert_to_global_cluster ? (
     var.global_cluster_identifier != null ? var.global_cluster_identifier : "${var.name_prefix}-${var.environment}-global"
   ) : null
+
+  # Source cluster for global cluster - only for external clusters
+  source_cluster_identifier = var.source_db_cluster_identifier
 
   # Master Password Logic
   master_password = var.master_password != null ? var.master_password : (

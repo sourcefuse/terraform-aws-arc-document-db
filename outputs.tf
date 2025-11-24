@@ -1,26 +1,26 @@
 output "global_cluster_arn" {
   description = "Amazon Resource Name (ARN) of the global cluster"
-  value       = var.create_global_cluster ? aws_docdb_global_cluster.this[0].arn : null
+  value       = var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].arn : (var.convert_to_global_cluster ? aws_docdb_global_cluster.conversion[0].arn : null)
 }
 
 output "global_cluster_id" {
   description = "The DocumentDB global cluster identifier"
-  value       = var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null
+  value       = var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].id : (var.convert_to_global_cluster ? aws_docdb_global_cluster.conversion[0].id : null)
 }
 
 output "global_cluster_identifier" {
   description = "The DocumentDB global cluster identifier"
-  value       = var.create_global_cluster ? aws_docdb_global_cluster.this[0].global_cluster_identifier : null
+  value       = var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].global_cluster_identifier : (var.convert_to_global_cluster ? aws_docdb_global_cluster.conversion[0].global_cluster_identifier : null)
 }
 
 output "global_cluster_resource_id" {
   description = "The DocumentDB Global Cluster Resource ID"
-  value       = var.create_global_cluster ? aws_docdb_global_cluster.this[0].global_cluster_resource_id : null
+  value       = var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].global_cluster_resource_id : (var.convert_to_global_cluster ? aws_docdb_global_cluster.conversion[0].global_cluster_resource_id : null)
 }
 
 output "global_cluster_members" {
   description = "List of DocumentDB Clusters that are part of this global cluster"
-  value       = var.create_global_cluster ? aws_docdb_global_cluster.this[0].global_cluster_members : null
+  value       = var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].global_cluster_members : (var.convert_to_global_cluster ? aws_docdb_global_cluster.conversion[0].global_cluster_members : null)
 }
 
 output "cluster_arn" {
