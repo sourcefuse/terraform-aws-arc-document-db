@@ -18,25 +18,6 @@ This is a **conversion scenario** where you have:
 4. **Maintains** zero downtime - your existing cluster continues operating normally
 5. **Preserves** all existing data and configurations
 
-## Architecture
-
-```
-┌─────────────────────────────────┐    ┌─────────────────────────────────┐
-│         PRIMARY REGION          │    │        SECONDARY REGION         │
-│           (us-east-1)           │    │          (us-west-2)            │
-├─────────────────────────────────┤    ├─────────────────────────────────┤
-│  ┌─────────────────────────────┐ │    │  ┌─────────────────────────────┐ │
-│  │    EXISTING CLUSTER         │ │    │  │      NEW DR CLUSTER         │ │
-│  │   (becomes PRIMARY)         │◄┼────┼──┤       (SECONDARY)           │ │
-│  │                             │ │    │  │                             │ │
-│  │ • Keeps all existing data   │ │    │  │ • Real-time replication     │ │
-│  │ • Zero downtime             │ │    │  │ • Read-only access          │ │
-│  │ • Write operations          │ │    │  │ • Failover capable          │ │
-│  └─────────────────────────────┘ │    │  └─────────────────────────────┘ │
-└─────────────────────────────────┘    └─────────────────────────────────┘
-              GLOBAL CLUSTER: my-global-cluster
-```
-
 ## Prerequisites
 
 Before running this example, ensure you have:
