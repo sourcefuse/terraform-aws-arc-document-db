@@ -184,12 +184,11 @@ resource "aws_docdb_cluster" "this" {
   engine_version = var.engine_version
 
   # Authentication
-  # For secondary clusters: AWS manages authentication automatically - never specify username
-  # For primary clusters: always specify username (fresh creation or conversion)
-  # However, AWS still requires master_password to be specified even for secondary clusters
+  # For secondary clusters: AWS manages authentication automatically - never specify username or password
+  # For primary clusters: always specify username and password (fresh creation or conversion)
   master_username             = var.is_secondary_cluster ? null : var.master_username
-  master_password             = var.is_secondary_cluster ? local.master_password : (var.create_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
-  manage_master_user_password = var.create_global_cluster || var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
+  master_password             = var.is_secondary_cluster ? null : (var.create_global_cluster || var.convert_to_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
+  manage_master_user_password = var.create_global_cluster || var.convert_to_global_cluster || var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
 
 
   # Database Configuration
@@ -241,6 +240,11 @@ resource "aws_docdb_cluster" "this" {
       error_message = "manage_master_user_password is not supported for global clusters. Set manage_master_user_password = false and provide an explicit master_password or use secret_config.create = true."
     }
 
+    precondition {
+      condition     = !var.is_secondary_cluster || !var.storage_encrypted || (var.kms_config.key_id != null || var.kms_config.create_key)
+      error_message = "For encrypted secondary clusters, you must either provide kms_config.key_id or set kms_config.create_key = true."
+    }
+
     ignore_changes = [
       master_password,
       global_cluster_identifier,
@@ -250,7 +254,8 @@ resource "aws_docdb_cluster" "this" {
 
   depends_on = [
     aws_docdb_subnet_group.this,
-    aws_docdb_cluster_parameter_group.this
+    aws_docdb_cluster_parameter_group.this,
+    module.kms
   ]
 }
 
