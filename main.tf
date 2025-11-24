@@ -93,7 +93,7 @@ resource "aws_secretsmanager_secret_version" "this" {
 # Note: source_db_cluster_identifier should only be used for EXTERNAL clusters
 # For Terraform-managed clusters, create empty global cluster and let cluster join it
 # DocumentDB Global Cluster - Fresh creation only
-resource "aws_docdb_global_cluster" "fresh" {
+resource "aws_docdb_global_cluster" "this" {
   count                     = var.create_global_cluster ? 1 : 0
   global_cluster_identifier = local.global_cluster_identifier
 
@@ -176,7 +176,7 @@ resource "aws_docdb_cluster" "this" {
   # Basic Configuration
   cluster_identifier        = local.cluster_identifier
   cluster_identifier_prefix = var.cluster_identifier_prefix
-  global_cluster_identifier = var.convert_to_global_cluster ? null : (var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.fresh[0].id : null))
+  global_cluster_identifier = var.convert_to_global_cluster ? null : (var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null))
 
 
   # Engine Configuration
