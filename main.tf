@@ -94,11 +94,13 @@ resource "aws_docdb_global_cluster" "this" {
   count                        = var.create_global_cluster ? 1 : 0
   global_cluster_identifier    = local.global_cluster_identifier
   source_db_cluster_identifier = var.source_db_cluster_identifier
-  engine                       = var.engine
-  engine_version               = var.engine_version
-  storage_encrypted            = var.storage_encrypted
-  deletion_protection          = var.deletion_protection
-  database_name                = var.database_name
+
+  # For fresh global cluster creation (no source cluster)
+  engine              = var.source_db_cluster_identifier == null ? var.engine : null
+  engine_version      = var.source_db_cluster_identifier == null ? var.engine_version : null
+  storage_encrypted   = var.source_db_cluster_identifier == null ? var.storage_encrypted : null
+  deletion_protection = var.source_db_cluster_identifier == null ? var.deletion_protection : null
+  database_name       = var.source_db_cluster_identifier == null ? var.database_name : null
 }
 
 # DB Subnet Group
