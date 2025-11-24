@@ -29,7 +29,7 @@ resource "random_id" "secret_suffix" {
 }
 # KMS Key using SourceFuse module
 module "kms" {
-  count   = var.kms_config.create_key ? 1 : 0
+  count   = var.kms_config.create_key || (var.is_secondary_cluster && var.storage_encrypted && var.kms_config.key_id == null) ? 1 : 0
   source  = "sourcefuse/arc-kms/aws"
   version = "0.0.1"
 
@@ -240,10 +240,6 @@ resource "aws_docdb_cluster" "this" {
       error_message = "manage_master_user_password is not supported for global clusters. Set manage_master_user_password = false and provide an explicit master_password or use secret_config.create = true."
     }
 
-    precondition {
-      condition     = !var.is_secondary_cluster || !var.storage_encrypted || (var.kms_config.key_id != null || var.kms_config.create_key)
-      error_message = "For encrypted secondary clusters, you must either provide kms_config.key_id or set kms_config.create_key = true."
-    }
 
     ignore_changes = [
       master_password,

@@ -16,8 +16,11 @@ locals {
   )
 
   # KMS Key Configuration
+  # For encrypted secondary clusters, automatically create KMS key if none specified
   kms_key_id = var.kms_config.key_id != null ? var.kms_config.key_id : (
-    var.kms_config.create_key && length(module.kms) > 0 ? module.kms[0].key_arn : null
+    var.kms_config.create_key && length(module.kms) > 0 ? module.kms[0].key_arn : (
+      var.is_secondary_cluster && var.storage_encrypted && length(module.kms) > 0 ? module.kms[0].key_arn : null
+    )
   )
 
   # Secrets Manager Configuration
