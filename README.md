@@ -149,21 +149,22 @@ This example demonstrates **converting an existing Multi-AZ cluster to a global 
 - Solves common "MasterUsername must be provided" errors
 - Production-ready conversion process with backup strategies
 
-## 🎯 **Global Cluster Scenarios**
+## **Global Cluster Scenarios**
 
 The module supports two different global cluster scenarios with different authentication requirements:
 
 ### **Scenario 1: Fresh Global Cluster Creation** → [See Example](examples/global-cluster-multi-region)
 Creating brand new global clusters from scratch:
-- ✅ Primary cluster: Provide `master_username` and set `manage_master_user_password = false`
-- ✅ Secondary cluster: Do NOT provide `master_username` - AWS manages authentication automatically
-- ✅ Both clusters need password (explicit `master_password` or `secret_config.create = true`)
+- Primary cluster: Set `create_global_cluster = true` and provide `master_username`
+- Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
+- Use explicit password or Secrets Manager (`secret_config.create = true`)
 
 ### **Scenario 2: Converting Existing Multi-AZ to Global** → [See Example](examples/global-cluster-conversion)
-Converting existing Multi-AZ clusters to global clusters:
-- ✅ Primary cluster: Use existing credentials with `manage_master_user_password = false`
-- ✅ Secondary cluster: Use `master_username_for_secondary_cluster` to match existing primary
-- ✅ Must provide passwords that match existing cluster credentials
+Converting existing Terraform-managed Multi-AZ clusters to global clusters:
+- Primary cluster: Set `convert_to_global_cluster = true` with existing credentials
+- Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
+- **Zero downtime** - existing cluster becomes global primary seamlessly
+- **Auto KMS handling** - module creates region-specific encryption keys automatically
 
 **Choose the right example for your use case!**
 
