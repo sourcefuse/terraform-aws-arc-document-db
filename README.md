@@ -145,7 +145,8 @@ This example demonstrates a global DocumentDB cluster spanning multiple AWS regi
 
 1. **Fresh Global Cluster Creation** (New Deployment):
    - Primary cluster: Provide `master_username` and set `manage_master_user_password = false`
-   - Secondary cluster: Do NOT provide `master_username` - AWS manages authentication automatically
+   - Secondary cluster: Do NOT provide `master_username` - AWS manages username automatically
+   - Both clusters need a password (use explicit `master_password` or `secret_config.create = true`)
    - Set `manage_master_user_password = false` for both clusters
 
 2. **Conversion Scenarios** (Existing → Global):
@@ -166,6 +167,15 @@ module "secondary_cluster" {
   is_secondary_cluster = true
   manage_master_user_password = false
   # Do NOT set master_username or master_username_for_secondary_cluster
+
+  # Password is still required - use either:
+  # Option 1: Explicit password
+  master_password = "your-password"
+
+  # Option 2: Secrets Manager (recommended)
+  secret_config = {
+    create = true
+  }
 }
 ```
 
@@ -175,6 +185,15 @@ module "secondary_cluster" {
   is_secondary_cluster = true
   master_username_for_secondary_cluster = "existing-username"  # Must match primary
   manage_master_user_password = false
+
+  # Password is still required - use either:
+  # Option 1: Explicit password (must match primary)
+  master_password = "existing-password"
+
+  # Option 2: Secrets Manager
+  secret_config = {
+    create = true
+  }
 }
 ```
 
@@ -236,11 +255,18 @@ module "secondary_cluster" {
 
   cluster_identifier = var.secondary_cluster_identifier
   # Note: For fresh global cluster creation, don't specify master_username for secondary clusters
-  # AWS manages authentication automatically. Only use master_username_for_secondary_cluster
+  # AWS manages username automatically. Only use master_username_for_secondary_cluster
   # when joining existing/external global clusters (conversion scenarios)
   # master_username_for_secondary_cluster = var.master_username  # Uncomment only for conversion scenarios
+
+  # Password is still required even for secondary clusters
   # Note: manage_master_user_password is not supported for global clusters
   manage_master_user_password = false
+
+  # Use Secrets Manager for password (recommended for global clusters)
+  secret_config = {
+    create = true
+  }
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class

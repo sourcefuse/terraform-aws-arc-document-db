@@ -167,8 +167,9 @@ resource "aws_docdb_cluster" "this" {
   # Authentication
   # For secondary clusters: only specify username when explicitly provided (conversion scenarios)
   # For fresh global cluster creation, leave username null so AWS manages authentication automatically
+  # However, AWS still requires master_password to be specified even for secondary clusters
   master_username             = var.is_secondary_cluster ? var.master_username_for_secondary_cluster : var.master_username
-  master_password             = var.is_secondary_cluster ? null : (var.create_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
+  master_password             = var.is_secondary_cluster ? local.master_password : (var.create_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
   manage_master_user_password = var.create_global_cluster || var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
 
 

@@ -65,11 +65,18 @@ module "secondary_cluster" {
 
   cluster_identifier = var.secondary_cluster_identifier
   # Note: For fresh global cluster creation, don't specify master_username for secondary clusters
-  # AWS manages authentication automatically. Only use master_username_for_secondary_cluster
+  # AWS manages username automatically. Only use master_username_for_secondary_cluster
   # when joining existing/external global clusters (conversion scenarios)
   # master_username_for_secondary_cluster = var.master_username  # Uncomment only for conversion scenarios
+
+  # Password is still required even for secondary clusters
   # Note: manage_master_user_password is not supported for global clusters
   manage_master_user_password = false
+
+  # Use Secrets Manager for password (recommended for global clusters)
+  secret_config = {
+    create = true
+  }
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
