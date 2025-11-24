@@ -153,13 +153,13 @@ This example demonstrates **converting an existing Multi-AZ cluster to a global 
 
 The module supports two different global cluster scenarios with different authentication requirements:
 
-### **Scenario 1: Fresh Global Cluster Creation** → [See Example](examples/global-cluster-multi-region)
+### **Scenario 1: Fresh Global Cluster Creation** → [See Example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-multi-region)
 Creating brand new global clusters from scratch:
 - Primary cluster: Set `create_global_cluster = true` and provide `master_username`
 - Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
 - Use explicit password or Secrets Manager (`secret_config.create = true`)
 
-### **Scenario 2: Converting Existing Multi-AZ to Global** → [See Example](examples/global-cluster-conversion)
+### **Scenario 2: Converting Existing Multi-AZ to Global** → [See Example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-conversion)
 Converting existing Terraform-managed Multi-AZ clusters to global clusters:
 - Primary cluster: Set `convert_to_global_cluster = true` with existing credentials
 - Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
@@ -169,9 +169,10 @@ Converting existing Terraform-managed Multi-AZ clusters to global clusters:
 **Choose the right example for your use case!**
 
 ### **Common Requirements for All Global Clusters**
-- **Password Management**: Set `manage_master_user_password = false` for all clusters (AWS managed passwords not supported)
-- **Authentication**: Use explicit passwords or Secrets Manager integration (`secret_config.create = true`)
+- **Password Management**: Set `manage_master_user_password = false` for global clusters (AWS managed passwords not supported)
+- **Authentication**: Secondary clusters don't need username/password - AWS manages automatically
 - **Regions**: Primary and secondary clusters must be in different AWS regions
+- **Encryption**: Module automatically handles KMS keys for cross-region encrypted clusters
 
 **Configuration Examples:**
 
@@ -179,17 +180,25 @@ Fresh Global Cluster (Secondary):
 ```hcl
 module "secondary_cluster" {
   is_secondary_cluster = true
+  # Do NOT set master_username, master_password, or manage_master_user_password
+  # AWS manages all authentication automatically for secondary clusters
+
+  # Global cluster connection
+  existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
+}
+```
+
+Conversion Scenario (Primary):
+```hcl
+module "primary_cluster" {
+  # Convert existing cluster to global primary
+  convert_to_global_cluster = true
+  global_cluster_identifier = "my-global-cluster"
+
+  # Keep existing credentials
+  master_username = "existing-username"
+  master_password = "existing-password"
   manage_master_user_password = false
-  # Do NOT set master_username or master_username_for_secondary_cluster
-
-  # Password is still required - use either:
-  # Option 1: Explicit password
-  master_password = "your-password"
-
-  # Option 2: Secrets Manager (recommended)
-  secret_config = {
-    create = true
-  }
 }
 ```
 
@@ -197,17 +206,11 @@ Conversion Scenario (Secondary):
 ```hcl
 module "secondary_cluster" {
   is_secondary_cluster = true
-  master_username_for_secondary_cluster = "existing-username"  # Must match primary
-  manage_master_user_password = false
+  # Do NOT set master_username, master_password, or manage_master_user_password
+  # AWS manages all authentication automatically for secondary clusters
 
-  # Password is still required - use either:
-  # Option 1: Explicit password (must match primary)
-  master_password = "existing-password"
-
-  # Option 2: Secrets Manager
-  secret_config = {
-    create = true
-  }
+  # Global cluster connection
+  existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
 }
 ```
 
@@ -268,19 +271,9 @@ module "secondary_cluster" {
   }
 
   cluster_identifier = var.secondary_cluster_identifier
-  # Note: For fresh global cluster creation, don't specify master_username for secondary clusters
-  # AWS manages username automatically. Only use master_username_for_secondary_cluster
-  # when joining existing/external global clusters (conversion scenarios)
-  # master_username_for_secondary_cluster = var.master_username  # Uncomment only for conversion scenarios
-
-  # Password is still required even for secondary clusters
-  # Note: manage_master_user_password is not supported for global clusters
-  manage_master_user_password = false
-
-  # Use Secrets Manager for password (recommended for global clusters)
-  secret_config = {
-    create = true
-  }
+  # Note: For secondary clusters, AWS manages authentication automatically
+  # Do NOT specify master_username, master_password, or manage_master_user_password
+  # Do NOT configure secret_config for secondary clusters
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
@@ -477,6 +470,7 @@ event_subscription_config = {
 | <a name="input_cluster_identifier"></a> [cluster\_identifier](#input\_cluster\_identifier) | The cluster identifier. If omitted, Terraform will assign a random, unique identifier | `string` | `null` | no |
 | <a name="input_cluster_identifier_prefix"></a> [cluster\_identifier\_prefix](#input\_cluster\_identifier\_prefix) | Creates a unique cluster identifier beginning with the specified prefix | `string` | `null` | no |
 | <a name="input_copy_tags_to_snapshot"></a> [copy\_tags\_to\_snapshot](#input\_copy\_tags\_to\_snapshot) | Copy all Cluster tags to snapshots | `bool` | `false` | no |
+| <a name="input_convert_to_global_cluster"></a> [convert\_to\_global\_cluster](#input\_convert\_to\_global\_cluster) | Whether to convert an existing Terraform-managed cluster to a global cluster. When true, the existing cluster becomes the source/primary of the global cluster. | `bool` | `false` | no |
 | <a name="input_create_global_cluster"></a> [create\_global\_cluster](#input\_create\_global\_cluster) | Whether to create a DocumentDB Global Cluster | `bool` | `false` | no |
 | <a name="input_create_monitoring_role"></a> [create\_monitoring\_role](#input\_create\_monitoring\_role) | Whether to create an IAM role for enhanced monitoring | `bool` | `false` | no |
 | <a name="input_create_security_group"></a> [create\_security\_group](#input\_create\_security\_group) | Whether to create a security group for the DocumentDB cluster | `bool` | `true` | no |

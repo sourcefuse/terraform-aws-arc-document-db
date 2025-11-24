@@ -229,6 +229,103 @@ The example includes basic CloudWatch monitoring:
 - Audit logs: `/aws/docdb/{cluster-name}/audit`
 - Profiler logs: `/aws/docdb/{cluster-name}/profiler`
 
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0, < 7.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws.primary"></a> [aws.primary](#provider\_aws.primary) | 5.100.0 |
+| <a name="provider_aws.secondary"></a> [aws.secondary](#provider\_aws.secondary) | 5.100.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_primary_cluster"></a> [primary\_cluster](#module\_primary\_cluster) | ../../ | n/a |
+| <a name="module_secondary_cluster"></a> [secondary\_cluster](#module\_secondary\_cluster) | ../../ | n/a |
+| <a name="module_tags"></a> [tags](#module\_tags) | sourcefuse/arc-tags/aws | 1.2.3 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_subnets.primary_all](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
+| [aws_subnets.primary_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
+| [aws_subnets.secondary_all](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
+| [aws_subnets.secondary_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
+| [aws_vpc.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+| [aws_vpc.secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_allowed_cidr_blocks"></a> [allowed\_cidr\_blocks](#input\_allowed\_cidr\_blocks) | List of CIDR blocks allowed to access DocumentDB | `list(string)` | <pre>[<br/>  "10.0.0.0/16"<br/>]</pre> | no |
+| <a name="input_backup_retention_period"></a> [backup\_retention\_period](#input\_backup\_retention\_period) | The days to retain backups for | `number` | `7` | no |
+| <a name="input_deletion_protection"></a> [deletion\_protection](#input\_deletion\_protection) | Whether to enable deletion protection | `bool` | `true` | no |
+| <a name="input_enabled_cloudwatch_logs_exports"></a> [enabled\_cloudwatch\_logs\_exports](#input\_enabled\_cloudwatch\_logs\_exports) | List of log types to export to CloudWatch | `list(string)` | <pre>[<br/>  "audit",<br/>  "profiler"<br/>]</pre> | no |
+| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | DocumentDB engine version (must match existing cluster) | `string` | `"4.0.0"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name for primary cluster | `string` | `"prod"` | no |
+| <a name="input_global_cluster_identifier"></a> [global\_cluster\_identifier](#input\_global\_cluster\_identifier) | Identifier for the global cluster | `string` | `null` | no |
+| <a name="input_master_password"></a> [master\_password](#input\_master\_password) | Master password for the existing cluster (must match current cluster) | `string` | n/a | yes |
+| <a name="input_master_username"></a> [master\_username](#input\_master\_username) | Master username for the existing cluster (must match current cluster) | `string` | `"docdbadmin"` | no |
+| <a name="input_parameter_group_config"></a> [parameter\_group\_config](#input\_parameter\_group\_config) | DB cluster parameter group configuration | <pre>object({<br/>    create = optional(bool, false)<br/>    family = optional(string, "docdb4.0")<br/>    parameters = optional(list(object({<br/>      name  = string<br/>      value = string<br/>    })), [])<br/>  })</pre> | <pre>{<br/>  "create": false,<br/>  "family": "docdb4.0",<br/>  "parameters": [<br/>    {<br/>      "name": "tls",<br/>      "value": "enabled"<br/>    }<br/>  ]<br/>}</pre> | no |
+| <a name="input_preferred_backup_window"></a> [preferred\_backup\_window](#input\_preferred\_backup\_window) | The daily time range during which automated backups are created | `string` | `"07:00-09:00"` | no |
+| <a name="input_preferred_maintenance_window"></a> [preferred\_maintenance\_window](#input\_preferred\_maintenance\_window) | The weekly time range during which system maintenance can occur (primary) | `string` | `"sun:05:00-sun:06:00"` | no |
+| <a name="input_primary_cluster_identifier"></a> [primary\_cluster\_identifier](#input\_primary\_cluster\_identifier) | Identifier of the existing cluster to convert to global | `string` | n/a | yes |
+| <a name="input_primary_instance_class"></a> [primary\_instance\_class](#input\_primary\_instance\_class) | Instance class for primary cluster instances | `string` | `"db.t3.medium"` | no |
+| <a name="input_primary_instance_count"></a> [primary\_instance\_count](#input\_primary\_instance\_count) | Number of instances in the primary cluster | `number` | `2` | no |
+| <a name="input_primary_region"></a> [primary\_region](#input\_primary\_region) | AWS region where the existing cluster is located | `string` | `"us-east-1"` | no |
+| <a name="input_primary_vpc_name"></a> [primary\_vpc\_name](#input\_primary\_vpc\_name) | Name tag of the VPC in the primary region | `string` | `"default"` | no |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the project | `string` | `"docdb-global-conversion"` | no |
+| <a name="input_secondary_cluster_identifier"></a> [secondary\_cluster\_identifier](#input\_secondary\_cluster\_identifier) | Identifier for the secondary (DR) cluster | `string` | `null` | no |
+| <a name="input_secondary_instance_class"></a> [secondary\_instance\_class](#input\_secondary\_instance\_class) | Instance class for secondary cluster instances | `string` | `"db.t3.medium"` | no |
+| <a name="input_secondary_instance_count"></a> [secondary\_instance\_count](#input\_secondary\_instance\_count) | Number of instances in the secondary cluster | `number` | `1` | no |
+| <a name="input_secondary_preferred_backup_window"></a> [secondary\_preferred\_backup\_window](#input\_secondary\_preferred\_backup\_window) | The daily time range during which automated backups are created (secondary) | `string` | `"10:00-12:00"` | no |
+| <a name="input_secondary_preferred_maintenance_window"></a> [secondary\_preferred\_maintenance\_window](#input\_secondary\_preferred\_maintenance\_window) | The weekly time range during which system maintenance can occur (secondary) | `string` | `"sun:08:00-sun:09:00"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | AWS region for the disaster recovery cluster | `string` | `"us-west-2"` | no |
+| <a name="input_secondary_vpc_name"></a> [secondary\_vpc\_name](#input\_secondary\_vpc\_name) | Name tag of the VPC in the secondary region | `string` | `"default"` | no |
+| <a name="input_skip_final_snapshot"></a> [skip\_final\_snapshot](#input\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before deletion | `bool` | `false` | no |
+| <a name="input_storage_encrypted"></a> [storage\_encrypted](#input\_storage\_encrypted) | Whether to encrypt the DocumentDB cluster | `bool` | `true` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cloudwatch_log_groups"></a> [cloudwatch\_log\_groups](#output\_cloudwatch\_log\_groups) | CloudWatch log groups created for both clusters |
+| <a name="output_connection_info"></a> [connection\_info](#output\_connection\_info) | Connection information for both clusters |
+| <a name="output_disaster_recovery_info"></a> [disaster\_recovery\_info](#output\_disaster\_recovery\_info) | Disaster recovery configuration summary |
+| <a name="output_global_cluster_arn"></a> [global\_cluster\_arn](#output\_global\_cluster\_arn) | ARN of the global cluster |
+| <a name="output_global_cluster_id"></a> [global\_cluster\_id](#output\_global\_cluster\_id) | ID of the global cluster |
+| <a name="output_global_cluster_identifier"></a> [global\_cluster\_identifier](#output\_global\_cluster\_identifier) | Identifier of the global cluster |
+| <a name="output_global_cluster_members"></a> [global\_cluster\_members](#output\_global\_cluster\_members) | List of clusters that are members of this global cluster |
+| <a name="output_primary_cluster_arn"></a> [primary\_cluster\_arn](#output\_primary\_cluster\_arn) | ARN of the primary cluster |
+| <a name="output_primary_cluster_endpoint"></a> [primary\_cluster\_endpoint](#output\_primary\_cluster\_endpoint) | Writer endpoint of the primary cluster |
+| <a name="output_primary_cluster_hosted_zone_id"></a> [primary\_cluster\_hosted\_zone\_id](#output\_primary\_cluster\_hosted\_zone\_id) | Route53 hosted zone ID of the primary cluster |
+| <a name="output_primary_cluster_id"></a> [primary\_cluster\_id](#output\_primary\_cluster\_id) | ID of the primary cluster |
+| <a name="output_primary_cluster_identifier"></a> [primary\_cluster\_identifier](#output\_primary\_cluster\_identifier) | Identifier of the primary cluster |
+| <a name="output_primary_cluster_port"></a> [primary\_cluster\_port](#output\_primary\_cluster\_port) | Port of the primary cluster |
+| <a name="output_primary_cluster_reader_endpoint"></a> [primary\_cluster\_reader\_endpoint](#output\_primary\_cluster\_reader\_endpoint) | Reader endpoint of the primary cluster |
+| <a name="output_primary_instance_endpoints"></a> [primary\_instance\_endpoints](#output\_primary\_instance\_endpoints) | List of individual instance endpoints in the primary cluster |
+| <a name="output_primary_security_group_id"></a> [primary\_security\_group\_id](#output\_primary\_security\_group\_id) | Security group ID for the primary cluster |
+| <a name="output_secondary_cluster_arn"></a> [secondary\_cluster\_arn](#output\_secondary\_cluster\_arn) | ARN of the secondary cluster |
+| <a name="output_secondary_cluster_endpoint"></a> [secondary\_cluster\_endpoint](#output\_secondary\_cluster\_endpoint) | Writer endpoint of the secondary cluster |
+| <a name="output_secondary_cluster_hosted_zone_id"></a> [secondary\_cluster\_hosted\_zone\_id](#output\_secondary\_cluster\_hosted\_zone\_id) | Route53 hosted zone ID of the secondary cluster |
+| <a name="output_secondary_cluster_id"></a> [secondary\_cluster\_id](#output\_secondary\_cluster\_id) | ID of the secondary cluster |
+| <a name="output_secondary_cluster_identifier"></a> [secondary\_cluster\_identifier](#output\_secondary\_cluster\_identifier) | Identifier of the secondary cluster |
+| <a name="output_secondary_cluster_port"></a> [secondary\_cluster\_port](#output\_secondary\_cluster\_port) | Port of the secondary cluster |
+| <a name="output_secondary_cluster_reader_endpoint"></a> [secondary\_cluster\_reader\_endpoint](#output\_secondary\_cluster\_reader\_endpoint) | Reader endpoint of the secondary cluster |
+| <a name="output_secondary_instance_endpoints"></a> [secondary\_instance\_endpoints](#output\_secondary\_instance\_endpoints) | List of individual instance endpoints in the secondary cluster |
+| <a name="output_secondary_security_group_id"></a> [secondary\_security\_group\_id](#output\_secondary\_security\_group\_id) | Security group ID for the secondary cluster |
+<!-- END_TF_DOCS -->
+
 ## Cost Considerations
 
 ### Instance Costs
