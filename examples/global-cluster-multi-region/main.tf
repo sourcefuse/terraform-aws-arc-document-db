@@ -93,11 +93,6 @@ module "secondary_cluster" {
   existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
   is_secondary_cluster               = true
 
-  # Security features (inherit from global cluster)
-  kms_config = {
-    create_key = true
-  }
-  storage_encrypted   = true
   deletion_protection = var.deletion_protection
   skip_final_snapshot = var.skip_final_snapshot
 
