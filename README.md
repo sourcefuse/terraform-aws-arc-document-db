@@ -131,7 +131,7 @@ cluster_identifier = var.cluster_identifier
 
 ### [Global Cluster Multi-Region](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-multi-region)
 
-This example demonstrates a global DocumentDB cluster spanning multiple AWS regions:
+This example demonstrates a **fresh global DocumentDB cluster** spanning multiple AWS regions:
 
 - Primary cluster in us-east-1
 - Secondary cluster in us-west-2
@@ -139,25 +139,38 @@ This example demonstrates a global DocumentDB cluster spanning multiple AWS regi
 - Region-specific configurations
 - Disaster recovery setup
 
-**Important Notes for Global Clusters**:
+### [Global Cluster Conversion](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-conversion)
 
-**Two Different Scenarios:**
+This example demonstrates **converting an existing Multi-AZ cluster to a global cluster**:
 
-1. **Fresh Global Cluster Creation** (New Deployment):
-   - Primary cluster: Provide `master_username` and set `manage_master_user_password = false`
-   - Secondary cluster: Do NOT provide `master_username` - AWS manages username automatically
-   - Both clusters need a password (use explicit `master_password` or `secret_config.create = true`)
-   - Set `manage_master_user_password = false` for both clusters
+- Convert existing Multi-AZ cluster to global primary
+- Add secondary cluster in another region
+- Proper authentication handling for conversion scenarios
+- Solves common "MasterUsername must be provided" errors
+- Production-ready conversion process with backup strategies
 
-2. **Conversion Scenarios** (Existing → Global):
-   - Primary cluster: Use existing configuration with `master_username` and set `manage_master_user_password = false`
-   - Secondary cluster: Use `master_username_for_secondary_cluster = "existing-username"` to match primary
-   - Set `manage_master_user_password = false` for both clusters
+## 🎯 **Global Cluster Scenarios**
 
-**General Rules:**
-- **Password Management**: AWS managed passwords (`manage_master_user_password = true`) are not supported for global clusters
-- Always set `manage_master_user_password = false` for both primary and secondary clusters
-- Use explicit passwords or Secrets Manager integration (`secret_config.create = true`)
+The module supports two different global cluster scenarios with different authentication requirements:
+
+### **Scenario 1: Fresh Global Cluster Creation** → [See Example](examples/global-cluster-multi-region)
+Creating brand new global clusters from scratch:
+- ✅ Primary cluster: Provide `master_username` and set `manage_master_user_password = false`
+- ✅ Secondary cluster: Do NOT provide `master_username` - AWS manages authentication automatically
+- ✅ Both clusters need password (explicit `master_password` or `secret_config.create = true`)
+
+### **Scenario 2: Converting Existing Multi-AZ to Global** → [See Example](examples/global-cluster-conversion)
+Converting existing Multi-AZ clusters to global clusters:
+- ✅ Primary cluster: Use existing credentials with `manage_master_user_password = false`
+- ✅ Secondary cluster: Use `master_username_for_secondary_cluster` to match existing primary
+- ✅ Must provide passwords that match existing cluster credentials
+
+**Choose the right example for your use case!**
+
+### **Common Requirements for All Global Clusters**
+- **Password Management**: Set `manage_master_user_password = false` for all clusters (AWS managed passwords not supported)
+- **Authentication**: Use explicit passwords or Secrets Manager integration (`secret_config.create = true`)
+- **Regions**: Primary and secondary clusters must be in different AWS regions
 
 **Configuration Examples:**
 
@@ -490,6 +503,7 @@ event_subscription_config = {
 | <a name="input_manage_master_user_password"></a> [manage\_master\_user\_password](#input\_manage\_master\_user\_password) | Set to true to allow RDS to manage the master user password in Secrets Manager | `bool` | `true` | no |
 | <a name="input_master_password"></a> [master\_password](#input\_master\_password) | Password for the master DB user. If not provided and create\_secret is true, will be auto-generated | `string` | `null` | no |
 | <a name="input_master_username"></a> [master\_username](#input\_master\_username) | Username for the master DB user | `string` | `"docdbadmin"` | no |
+| <a name="input_master_username_for_secondary_cluster"></a> [master\_username\_for\_secondary\_cluster](#input\_master\_username\_for\_secondary\_cluster) | Username for secondary clusters. Set this only when joining external/existing global clusters (conversion scenarios). Leave null for fresh global cluster creation where AWS manages authentication automatically. | `string` | `null` | no |
 | <a name="input_monitoring_interval"></a> [monitoring\_interval](#input\_monitoring\_interval) | The interval for collecting enhanced monitoring metrics. Valid values: 0, 1, 5, 10, 15, 30, 60 | `number` | `0` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix for resources | `string` | `"docdb"` | no |
 | <a name="input_parameter_group_config"></a> [parameter\_group\_config](#input\_parameter\_group\_config) | DB cluster parameter group configuration | <pre>object({<br/>    name   = optional(string, null)<br/>    create = optional(bool, false)<br/>    family = optional(string, "docdb4.0")<br/>    parameters = optional(list(object({<br/>      name  = string<br/>      value = string<br/>    })), [])<br/>  })</pre> | `{}` | no |

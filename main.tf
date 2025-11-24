@@ -1,6 +1,9 @@
 # Data source for current AWS account
 data "aws_caller_identity" "current" {}
 
+# Note: AWS provider doesn't have aws_docdb_cluster data source
+# For conversion scenarios, outputs will be limited to global cluster information
+
 # Random password for master user
 resource "random_password" "master" {
   count            = var.secret_config.create && var.master_password == null ? 1 : 0
@@ -73,13 +76,13 @@ resource "aws_secretsmanager_secret" "this" {
 }
 
 resource "aws_secretsmanager_secret_version" "this" {
-  count     = var.secret_config.create ? 1 : 0
+  count     = var.secret_config.create && var.source_db_cluster_identifier == null ? 1 : 0
   secret_id = aws_secretsmanager_secret.this[0].id
   secret_string = jsonencode({
     username = var.master_username
     password = local.master_password
     engine   = var.engine
-    host     = aws_docdb_cluster.this.endpoint
+    host     = aws_docdb_cluster.this[0].endpoint
     port     = var.port
     dbname   = var.database_name
   })
@@ -153,7 +156,10 @@ resource "aws_docdb_event_subscription" "this" {
 }
 
 # DocumentDB Cluster
+# Note: This resource is not created when source_db_cluster_identifier is provided
+# because the existing cluster automatically becomes part of the global cluster
 resource "aws_docdb_cluster" "this" {
+  count = var.source_db_cluster_identifier != null ? 0 : 1
   # Basic Configuration
   cluster_identifier        = local.cluster_identifier
   cluster_identifier_prefix = var.cluster_identifier_prefix
@@ -232,10 +238,12 @@ resource "aws_docdb_cluster" "this" {
 }
 
 # DocumentDB Cluster Instances
+# Note: Instances are not created when source_db_cluster_identifier is provided
+# because the existing cluster already has its instances
 resource "aws_docdb_cluster_instance" "this" {
-  count              = var.instance_count
+  count              = var.source_db_cluster_identifier != null ? 0 : var.instance_count
   identifier         = var.instance_identifier_prefix != null ? "${var.instance_identifier_prefix}-${count.index + 1}" : "${local.cluster_identifier}-${count.index + 1}"
-  cluster_identifier = aws_docdb_cluster.this.id
+  cluster_identifier = aws_docdb_cluster.this[0].id
 
   # Instance Configuration
   instance_class = var.instance_class
@@ -263,25 +271,29 @@ resource "aws_docdb_cluster_instance" "this" {
 }
 
 # CloudWatch Log Groups
+# Note: Log groups are not created for conversion scenarios since the existing cluster
+# already has its log groups configured
 resource "aws_cloudwatch_log_group" "audit" {
-  count             = contains(var.enabled_cloudwatch_logs_exports, "audit") ? 1 : 0
-  name              = "/aws/docdb/${aws_docdb_cluster.this.cluster_identifier}/audit"
+  count             = contains(var.enabled_cloudwatch_logs_exports, "audit") && var.source_db_cluster_identifier == null ? 1 : 0
+  name              = "/aws/docdb/${aws_docdb_cluster.this[0].cluster_identifier}/audit"
   retention_in_days = var.cloudwatch_log_retention_in_days
   kms_key_id        = var.cloudwatch_log_kms_key_id
   tags              = var.tags
 }
 
 resource "aws_cloudwatch_log_group" "profiler" {
-  count             = contains(var.enabled_cloudwatch_logs_exports, "profiler") ? 1 : 0
-  name              = "/aws/docdb/${aws_docdb_cluster.this.cluster_identifier}/profiler"
+  count             = contains(var.enabled_cloudwatch_logs_exports, "profiler") && var.source_db_cluster_identifier == null ? 1 : 0
+  name              = "/aws/docdb/${aws_docdb_cluster.this[0].cluster_identifier}/profiler"
   retention_in_days = var.cloudwatch_log_retention_in_days
   kms_key_id        = var.cloudwatch_log_kms_key_id
   tags              = var.tags
 }
 
 # CloudWatch Alarms
+# Note: Alarms are not created for conversion scenarios since the existing cluster
+# already has its monitoring configured
 resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
-  count               = var.alarm_config.create_alarms ? var.instance_count : 0
+  count               = var.alarm_config.create_alarms && var.source_db_cluster_identifier == null ? var.instance_count : 0
   alarm_name          = "${aws_docdb_cluster_instance.this[count.index].identifier}-cpu-utilization"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.alarm_config.cpu.evaluation_periods
@@ -303,7 +315,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "database_connections" {
-  count               = var.alarm_config.create_alarms ? var.instance_count : 0
+  count               = var.alarm_config.create_alarms && var.source_db_cluster_identifier == null ? var.instance_count : 0
   alarm_name          = "${aws_docdb_cluster_instance.this[count.index].identifier}-database-connections"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.alarm_config.connections.evaluation_periods
