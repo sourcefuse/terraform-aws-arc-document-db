@@ -18,6 +18,8 @@ module "primary_cluster" {
 
   cluster_identifier = var.primary_cluster_identifier
   master_username    = var.master_username
+  # Note: manage_master_user_password is not supported for global clusters
+  manage_master_user_password = false
 
   instance_count = var.primary_instance_count
   instance_class = var.primary_instance_class
@@ -62,6 +64,19 @@ module "secondary_cluster" {
   }
 
   cluster_identifier = var.secondary_cluster_identifier
+  # Note: For fresh global cluster creation, don't specify master_username for secondary clusters
+  # AWS manages username automatically. Only use master_username_for_secondary_cluster
+  # when joining existing/external global clusters (conversion scenarios)
+  # master_username_for_secondary_cluster = var.master_username  # Uncomment only for conversion scenarios
+
+  # Password is still required even for secondary clusters
+  # Note: manage_master_user_password is not supported for global clusters
+  manage_master_user_password = false
+
+  # Use Secrets Manager for password (recommended for global clusters)
+  secret_config = {
+    create = true
+  }
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
@@ -78,11 +93,6 @@ module "secondary_cluster" {
   existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
   is_secondary_cluster               = true
 
-  # Security features (inherit from global cluster)
-  kms_config = {
-    create_key = true
-  }
-  storage_encrypted   = true
   deletion_protection = var.deletion_protection
   skip_final_snapshot = var.skip_final_snapshot
 

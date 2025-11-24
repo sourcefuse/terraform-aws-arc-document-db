@@ -1,6 +1,9 @@
 # Data source for current AWS account
 data "aws_caller_identity" "current" {}
 
+# Note: AWS provider doesn't have aws_docdb_cluster data source
+# For conversion scenarios, outputs will be limited to global cluster information
+
 # Random password for master user
 resource "random_password" "master" {
   count            = var.secret_config.create && var.master_password == null ? 1 : 0
@@ -26,7 +29,7 @@ resource "random_id" "secret_suffix" {
 }
 # KMS Key using SourceFuse module
 module "kms" {
-  count   = var.kms_config.create_key ? 1 : 0
+  count   = var.kms_config.create_key || (var.is_secondary_cluster && var.storage_encrypted && var.kms_config.key_id == null) ? 1 : 0
   source  = "sourcefuse/arc-kms/aws"
   version = "0.0.1"
 
@@ -87,15 +90,31 @@ resource "aws_secretsmanager_secret_version" "this" {
 }
 
 # DocumentDB Global Cluster
+# Note: source_db_cluster_identifier should only be used for EXTERNAL clusters
+# For Terraform-managed clusters, create empty global cluster and let cluster join it
+# DocumentDB Global Cluster - Fresh creation only
 resource "aws_docdb_global_cluster" "this" {
-  count                        = var.create_global_cluster ? 1 : 0
+  count                     = var.create_global_cluster ? 1 : 0
+  global_cluster_identifier = local.global_cluster_identifier
+
+  # Use source cluster identifier for external clusters only
+  source_db_cluster_identifier = local.source_cluster_identifier
+
+  # These are only set when creating a fresh global cluster (no source cluster)
+  engine              = local.source_cluster_identifier == null ? var.engine : null
+  engine_version      = local.source_cluster_identifier == null ? var.engine_version : null
+  storage_encrypted   = local.source_cluster_identifier == null ? var.storage_encrypted : null
+  deletion_protection = local.source_cluster_identifier == null ? var.deletion_protection : null
+  database_name       = local.source_cluster_identifier == null ? var.database_name : null
+}
+
+# DocumentDB Global Cluster - Conversion scenario
+resource "aws_docdb_global_cluster" "conversion" {
+  count                        = var.convert_to_global_cluster ? 1 : 0
   global_cluster_identifier    = local.global_cluster_identifier
-  source_db_cluster_identifier = var.source_db_cluster_identifier
-  engine                       = var.engine
-  engine_version               = var.engine_version
-  storage_encrypted            = var.storage_encrypted
-  deletion_protection          = var.deletion_protection
-  database_name                = var.database_name
+  source_db_cluster_identifier = aws_docdb_cluster.this.arn
+
+  depends_on = [aws_docdb_cluster.this]
 }
 
 # DB Subnet Group
@@ -157,16 +176,19 @@ resource "aws_docdb_cluster" "this" {
   # Basic Configuration
   cluster_identifier        = local.cluster_identifier
   cluster_identifier_prefix = var.cluster_identifier_prefix
-  global_cluster_identifier = var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null)
+  global_cluster_identifier = var.convert_to_global_cluster ? null : (var.is_secondary_cluster ? var.existing_global_cluster_identifier : (var.create_global_cluster ? aws_docdb_global_cluster.this[0].id : null))
+
 
   # Engine Configuration
   engine         = var.engine
   engine_version = var.engine_version
 
   # Authentication
+  # For secondary clusters: AWS manages authentication automatically - never specify username or password
+  # For primary clusters: always specify username and password (fresh creation or conversion)
   master_username             = var.is_secondary_cluster ? null : var.master_username
-  master_password             = var.is_secondary_cluster || var.manage_master_user_password ? null : local.master_password
-  manage_master_user_password = var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
+  master_password             = var.is_secondary_cluster ? null : (var.create_global_cluster || var.convert_to_global_cluster ? local.master_password : (var.manage_master_user_password ? null : local.master_password))
+  manage_master_user_password = var.create_global_cluster || var.convert_to_global_cluster || var.is_secondary_cluster ? null : (var.manage_master_user_password ? true : null)
 
 
   # Database Configuration
@@ -203,6 +225,22 @@ resource "aws_docdb_cluster" "this" {
   tags = var.tags
 
   lifecycle {
+    precondition {
+      condition     = !var.is_secondary_cluster || var.existing_global_cluster_identifier != null
+      error_message = "existing_global_cluster_identifier is required when is_secondary_cluster is true."
+    }
+
+    precondition {
+      condition     = !(var.create_global_cluster && var.convert_to_global_cluster)
+      error_message = "create_global_cluster and convert_to_global_cluster cannot both be true. Use create_global_cluster for fresh global clusters, or convert_to_global_cluster for converting existing clusters."
+    }
+
+    precondition {
+      condition     = !(var.create_global_cluster && var.manage_master_user_password) && !(var.is_secondary_cluster && var.manage_master_user_password) && !(var.convert_to_global_cluster && var.manage_master_user_password)
+      error_message = "manage_master_user_password is not supported for global clusters. Set manage_master_user_password = false and provide an explicit master_password or use secret_config.create = true."
+    }
+
+
     ignore_changes = [
       master_password,
       global_cluster_identifier,
@@ -213,7 +251,7 @@ resource "aws_docdb_cluster" "this" {
   depends_on = [
     aws_docdb_subnet_group.this,
     aws_docdb_cluster_parameter_group.this,
-    aws_docdb_global_cluster.this
+    module.kms
   ]
 }
 

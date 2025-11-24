@@ -3,9 +3,12 @@ locals {
   cluster_identifier = var.cluster_identifier != null ? var.cluster_identifier : "${var.name_prefix}-${var.environment}"
 
   # Global Cluster Configuration
-  global_cluster_identifier = var.create_global_cluster ? (
+  global_cluster_identifier = var.create_global_cluster || var.convert_to_global_cluster ? (
     var.global_cluster_identifier != null ? var.global_cluster_identifier : "${var.name_prefix}-${var.environment}-global"
   ) : null
+
+  # Source cluster for global cluster - only for external clusters
+  source_cluster_identifier = var.source_db_cluster_identifier
 
   # Master Password Logic
   master_password = var.master_password != null ? var.master_password : (
@@ -13,8 +16,11 @@ locals {
   )
 
   # KMS Key Configuration
+  # For encrypted secondary clusters, automatically create KMS key if none specified
   kms_key_id = var.kms_config.key_id != null ? var.kms_config.key_id : (
-    var.kms_config.create_key && length(module.kms) > 0 ? module.kms[0].key_arn : null
+    var.kms_config.create_key && length(module.kms) > 0 ? module.kms[0].key_arn : (
+      var.is_secondary_cluster && var.storage_encrypted && length(module.kms) > 0 ? module.kms[0].key_arn : null
+    )
   )
 
   # Secrets Manager Configuration

@@ -245,6 +245,12 @@ variable "create_global_cluster" {
   default     = false
 }
 
+variable "convert_to_global_cluster" {
+  description = "Whether to convert an existing Terraform-managed cluster to a global cluster. When true, the existing cluster becomes the source/primary of the global cluster."
+  type        = bool
+  default     = false
+}
+
 variable "global_cluster_identifier" {
   description = "The global cluster identifier"
   type        = string

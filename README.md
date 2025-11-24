@@ -131,13 +131,88 @@ cluster_identifier = var.cluster_identifier
 
 ### [Global Cluster Multi-Region](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-multi-region)
 
-This example demonstrates a global DocumentDB cluster spanning multiple AWS regions:
+This example demonstrates a **fresh global DocumentDB cluster** spanning multiple AWS regions:
 
 - Primary cluster in us-east-1
-- Secondary cluster in us-east-2
+- Secondary cluster in us-west-2
 - Cross-region replication
 - Region-specific configurations
 - Disaster recovery setup
+
+### [Global Cluster Conversion](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-conversion)
+
+This example demonstrates **converting an existing Multi-AZ cluster to a global cluster**:
+
+- Convert existing Multi-AZ cluster to global primary
+- Add secondary cluster in another region
+- Proper authentication handling for conversion scenarios
+- Solves common "MasterUsername must be provided" errors
+- Production-ready conversion process with backup strategies
+
+## **Global Cluster Scenarios**
+
+The module supports two different global cluster scenarios with different authentication requirements:
+
+### **Scenario 1: Fresh Global Cluster Creation** → [See Example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-multi-region)
+Creating brand new global clusters from scratch:
+- Primary cluster: Set `create_global_cluster = true` and provide `master_username`
+- Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
+- Use explicit password or Secrets Manager (`secret_config.create = true`)
+
+### **Scenario 2: Converting Existing Multi-AZ to Global** → [See Example](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/global-cluster-conversion)
+Converting existing Terraform-managed Multi-AZ clusters to global clusters:
+- Primary cluster: Set `convert_to_global_cluster = true` with existing credentials
+- Secondary cluster: Set `is_secondary_cluster = true` - AWS manages authentication automatically
+- **Zero downtime** - existing cluster becomes global primary seamlessly
+- **Auto KMS handling** - module creates region-specific encryption keys automatically
+
+**Choose the right example for your use case!**
+
+### **Common Requirements for All Global Clusters**
+- **Password Management**: Set `manage_master_user_password = false` for global clusters (AWS managed passwords not supported)
+- **Authentication**: Secondary clusters don't need username/password - AWS manages automatically
+- **Regions**: Primary and secondary clusters must be in different AWS regions
+- **Encryption**: Module automatically handles KMS keys for cross-region encrypted clusters
+
+**Configuration Examples:**
+
+Fresh Global Cluster (Secondary):
+```hcl
+module "secondary_cluster" {
+  is_secondary_cluster = true
+  # Do NOT set master_username, master_password, or manage_master_user_password
+  # AWS manages all authentication automatically for secondary clusters
+
+  # Global cluster connection
+  existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
+}
+```
+
+Conversion Scenario (Primary):
+```hcl
+module "primary_cluster" {
+  # Convert existing cluster to global primary
+  convert_to_global_cluster = true
+  global_cluster_identifier = "my-global-cluster"
+
+  # Keep existing credentials
+  master_username = "existing-username"
+  master_password = "existing-password"
+  manage_master_user_password = false
+}
+```
+
+Conversion Scenario (Secondary):
+```hcl
+module "secondary_cluster" {
+  is_secondary_cluster = true
+  # Do NOT set master_username, master_password, or manage_master_user_password
+  # AWS manages all authentication automatically for secondary clusters
+
+  # Global cluster connection
+  existing_global_cluster_identifier = module.primary_cluster.global_cluster_identifier
+}
+```
 
 ```hcl
 # Primary cluster in us-east-1
@@ -150,6 +225,8 @@ module "primary_cluster" {
 
   cluster_identifier = var.primary_cluster_identifier
   master_username    = var.master_username
+  # Note: manage_master_user_password is not supported for global clusters
+  manage_master_user_password = false
 
   instance_count = var.primary_instance_count
   instance_class = var.primary_instance_class
@@ -194,6 +271,9 @@ module "secondary_cluster" {
   }
 
   cluster_identifier = var.secondary_cluster_identifier
+  # Note: For secondary clusters, AWS manages authentication automatically
+  # Do NOT specify master_username, master_password, or manage_master_user_password
+  # Do NOT configure secret_config for secondary clusters
 
   instance_count = var.secondary_instance_count
   instance_class = var.secondary_instance_class
@@ -390,6 +470,7 @@ event_subscription_config = {
 | <a name="input_cluster_identifier"></a> [cluster\_identifier](#input\_cluster\_identifier) | The cluster identifier. If omitted, Terraform will assign a random, unique identifier | `string` | `null` | no |
 | <a name="input_cluster_identifier_prefix"></a> [cluster\_identifier\_prefix](#input\_cluster\_identifier\_prefix) | Creates a unique cluster identifier beginning with the specified prefix | `string` | `null` | no |
 | <a name="input_copy_tags_to_snapshot"></a> [copy\_tags\_to\_snapshot](#input\_copy\_tags\_to\_snapshot) | Copy all Cluster tags to snapshots | `bool` | `false` | no |
+| <a name="input_convert_to_global_cluster"></a> [convert\_to\_global\_cluster](#input\_convert\_to\_global\_cluster) | Whether to convert an existing Terraform-managed cluster to a global cluster. When true, the existing cluster becomes the source/primary of the global cluster. | `bool` | `false` | no |
 | <a name="input_create_global_cluster"></a> [create\_global\_cluster](#input\_create\_global\_cluster) | Whether to create a DocumentDB Global Cluster | `bool` | `false` | no |
 | <a name="input_create_monitoring_role"></a> [create\_monitoring\_role](#input\_create\_monitoring\_role) | Whether to create an IAM role for enhanced monitoring | `bool` | `false` | no |
 | <a name="input_create_security_group"></a> [create\_security\_group](#input\_create\_security\_group) | Whether to create a security group for the DocumentDB cluster | `bool` | `true` | no |
@@ -417,6 +498,7 @@ event_subscription_config = {
 | <a name="input_manage_master_user_password"></a> [manage\_master\_user\_password](#input\_manage\_master\_user\_password) | Set to true to allow RDS to manage the master user password in Secrets Manager | `bool` | `true` | no |
 | <a name="input_master_password"></a> [master\_password](#input\_master\_password) | Password for the master DB user. If not provided and create\_secret is true, will be auto-generated | `string` | `null` | no |
 | <a name="input_master_username"></a> [master\_username](#input\_master\_username) | Username for the master DB user | `string` | `"docdbadmin"` | no |
+| <a name="input_master_username_for_secondary_cluster"></a> [master\_username\_for\_secondary\_cluster](#input\_master\_username\_for\_secondary\_cluster) | Username for secondary clusters. Set this only when joining external/existing global clusters (conversion scenarios). Leave null for fresh global cluster creation where AWS manages authentication automatically. | `string` | `null` | no |
 | <a name="input_monitoring_interval"></a> [monitoring\_interval](#input\_monitoring\_interval) | The interval for collecting enhanced monitoring metrics. Valid values: 0, 1, 5, 10, 15, 30, 60 | `number` | `0` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Name prefix for resources | `string` | `"docdb"` | no |
 | <a name="input_parameter_group_config"></a> [parameter\_group\_config](#input\_parameter\_group\_config) | DB cluster parameter group configuration | <pre>object({<br/>    name   = optional(string, null)<br/>    create = optional(bool, false)<br/>    family = optional(string, "docdb4.0")<br/>    parameters = optional(list(object({<br/>      name  = string<br/>      value = string<br/>    })), [])<br/>  })</pre> | `{}` | no |
