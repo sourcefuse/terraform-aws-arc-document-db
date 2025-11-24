@@ -308,7 +308,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "database_connections" {
-  count               = var.alarm_config.create_alarms && var.source_db_cluster_identifier == null ? var.instance_count : 0
+  count               = var.alarm_config.create_alarms ? var.instance_count : 0
   alarm_name          = "${aws_docdb_cluster_instance.this[count.index].identifier}-database-connections"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.alarm_config.connections.evaluation_periods
