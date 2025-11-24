@@ -24,48 +24,48 @@ output "global_cluster_members" {
 }
 
 output "cluster_arn" {
-  description = "Amazon Resource Name (ARN) of the cluster (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].arn
+  description = "Amazon Resource Name (ARN) of the cluster"
+  value       = aws_docdb_cluster.this.arn
 }
 
 output "cluster_id" {
   description = "The DocumentDB cluster identifier"
-  value       = var.source_db_cluster_identifier != null ? var.source_db_cluster_identifier : aws_docdb_cluster.this[0].id
+  value       = aws_docdb_cluster.this.id
 }
 
 output "cluster_identifier" {
   description = "The DocumentDB cluster identifier"
-  value       = var.source_db_cluster_identifier != null ? var.source_db_cluster_identifier : aws_docdb_cluster.this[0].cluster_identifier
+  value       = aws_docdb_cluster.this.cluster_identifier
 }
 
 output "cluster_endpoint" {
-  description = "The DNS address of the DocumentDB instance (null for conversion scenarios - use AWS CLI to get endpoint)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].endpoint
+  description = "The DNS address of the DocumentDB instance"
+  value       = aws_docdb_cluster.this.endpoint
 }
 
 output "cluster_reader_endpoint" {
-  description = "A read-only endpoint for the DocumentDB cluster (null for conversion scenarios - use AWS CLI to get endpoint)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].reader_endpoint
+  description = "A read-only endpoint for the DocumentDB cluster, automatically load-balanced across replicas"
+  value       = aws_docdb_cluster.this.reader_endpoint
 }
 
 output "cluster_port" {
   description = "The database port"
-  value       = var.source_db_cluster_identifier != null ? var.port : aws_docdb_cluster.this[0].port
+  value       = aws_docdb_cluster.this.port
 }
 
 output "cluster_hosted_zone_id" {
-  description = "The Route53 Hosted Zone ID of the endpoint (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].hosted_zone_id
+  description = "The Route53 Hosted Zone ID of the endpoint"
+  value       = aws_docdb_cluster.this.hosted_zone_id
 }
 
 output "cluster_resource_id" {
-  description = "The DocumentDB Cluster Resource ID (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].cluster_resource_id
+  description = "The DocumentDB Cluster Resource ID"
+  value       = aws_docdb_cluster.this.cluster_resource_id
 }
 
 output "cluster_members" {
-  description = "List of DocumentDB Instances that are a part of this cluster (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].cluster_members
+  description = "List of DocumentDB Instances that are a part of this cluster"
+  value       = aws_docdb_cluster.this.cluster_members
 }
 
 output "instance_ids" {
@@ -137,57 +137,57 @@ output "cluster_database_name" {
 
 output "cluster_engine" {
   description = "The database engine"
-  value       = var.source_db_cluster_identifier != null ? var.engine : aws_docdb_cluster.this[0].engine
+  value       = aws_docdb_cluster.this.engine
 }
 
 output "cluster_engine_version" {
   description = "The database engine version"
-  value       = var.source_db_cluster_identifier != null ? var.engine_version : aws_docdb_cluster.this[0].engine_version
+  value       = aws_docdb_cluster.this.engine_version
 }
 
 output "cluster_backup_retention_period" {
-  description = "The backup retention period (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].backup_retention_period
+  description = "The backup retention period"
+  value       = aws_docdb_cluster.this.backup_retention_period
 }
 
 output "cluster_preferred_backup_window" {
-  description = "The daily time range during which the backups happen (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].preferred_backup_window
+  description = "The daily time range during which the backups happen"
+  value       = aws_docdb_cluster.this.preferred_backup_window
 }
 
 output "cluster_preferred_maintenance_window" {
-  description = "The weekly time range during which system maintenance can occur (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].preferred_maintenance_window
+  description = "The weekly time range during which system maintenance can occur"
+  value       = aws_docdb_cluster.this.preferred_maintenance_window
 }
 
 output "cluster_storage_encrypted" {
   description = "Specifies whether the DB cluster is encrypted"
-  value       = var.source_db_cluster_identifier != null ? var.storage_encrypted : aws_docdb_cluster.this[0].storage_encrypted
+  value       = aws_docdb_cluster.this.storage_encrypted
 }
 
 output "cluster_kms_key_id" {
-  description = "The ARN for the KMS encryption key (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].kms_key_id
+  description = "The ARN for the KMS encryption key"
+  value       = aws_docdb_cluster.this.kms_key_id
 }
 
 output "cluster_availability_zones" {
-  description = "The availability zones of the cluster (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].availability_zones
+  description = "The availability zones of the cluster"
+  value       = aws_docdb_cluster.this.availability_zones
 }
 
 output "cluster_vpc_security_group_ids" {
-  description = "List of VPC security groups associated to the cluster (null for conversion scenarios)"
-  value       = var.source_db_cluster_identifier != null ? null : aws_docdb_cluster.this[0].vpc_security_group_ids
+  description = "List of VPC security groups associated to the cluster"
+  value       = aws_docdb_cluster.this.vpc_security_group_ids
 }
 
 output "cluster_enabled_cloudwatch_logs_exports" {
   description = "List of log types to export to cloudwatch"
-  value       = var.source_db_cluster_identifier != null ? var.enabled_cloudwatch_logs_exports : aws_docdb_cluster.this[0].enabled_cloudwatch_logs_exports
+  value       = aws_docdb_cluster.this.enabled_cloudwatch_logs_exports
 }
 
 output "cluster_deletion_protection" {
   description = "Specifies whether the cluster has deletion protection enabled"
-  value       = var.source_db_cluster_identifier != null ? var.deletion_protection : aws_docdb_cluster.this[0].deletion_protection
+  value       = aws_docdb_cluster.this.deletion_protection
 }
 
 output "instance_identifiers" {
