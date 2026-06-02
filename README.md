@@ -42,7 +42,8 @@ The SourceFuse AWS Reference Architecture (ARC) Terraform module for managing AW
 - Parameter groups and custom configurations
 
 For more information about this repository and its usage, please see [Terraform AWS DOCUMENT DB Usage Guide](https://github.com/sourcefuse/terraform-aws-arc-document-db/blob/main/docs/module-usage-guide/README.md).
-## Quickstart### 
+## Quickstart
+
 [Basic Cluster](https://github.com/sourcefuse/terraform-aws-arc-document-db/tree/main/examples/basic-cluster)
 
 This example demonstrates a simple DocumentDB cluster setup with basic configuration:
