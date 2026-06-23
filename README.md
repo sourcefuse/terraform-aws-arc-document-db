@@ -20,6 +20,9 @@
 
 [![Quality Gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-document-db)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-document-db)
 
+> [!TIP]
+> 🤖 **New:** Use this module with AI assistants via the [ARC IaC MCP Server](https://github.com/sourcefuse/arc-iac-mcp) — search, scaffold, and security-scan ARC modules from natural language. [Quick setup ↓](#ai-assistant-integration-arc-iac-mcp)
+
 ## Overview
 
 The SourceFuse AWS Reference Architecture (ARC) Terraform module for managing AWS DocumentDB offers a streamlined solution for provisioning, configuring, and managing DocumentDB clusters within the Amazon Web Services (AWS) environment. This Terraform module is specifically designed to simplify the deployment and maintenance of DocumentDB clusters with enterprise-grade features including:
